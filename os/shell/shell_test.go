@@ -17,51 +17,29 @@ func TestClassify(t *testing.T) {
 	}
 
 	type test struct {
-		name string
 		bin  string
 		ctx  Context
 		skip bool
 		expected
 	}
 
-	tests := []test{
-		{
-			"sh",
-			"/bin/sh",
-			All,
-			false,
-			expected{Sh, nil},
-		},
-		{
-			"bash",
-			"/bin/bash",
-			All,
-			false,
-			expected{Bash, nil},
-		},
-		{
-			"zsh",
-			"/usr/local/bin/zsh",
-			All,
-			false,
-			expected{Zsh, nil},
-		},
-		{
-			"PowerShell",
+	tests := map[string]test{
+		"sh":   {"/bin/sh", All, false, expected{Sh, nil}},
+		"bash": {"/bin/bash", All, false, expected{Bash, nil}},
+		"zsh":  {"/usr/local/bin/zsh", All, false, expected{Zsh, nil}},
+		"PowerShell": {
 			"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
 			All,
 			runtime.GOOS != "windows",
 			expected{PowerShell, nil},
 		},
-		{
-			"PowerShell hack",
-			"/usr/local/bin/powershell.exe",
+		"PowerShell hack": {
+			"/usr/local/bin/powershell",
 			All,
 			false,
 			expected{PowerShell, nil},
 		},
-		{
-			"fish",
+		"fish": {
 			"/usr/local/bin/fish",
 			All,
 			false,
@@ -69,8 +47,8 @@ func TestClassify(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
 			if test.skip {
 				t.SkipNow()
 			}
@@ -88,5 +66,5 @@ func TestClassify(t *testing.T) {
 		})
 	}
 
-	assert.Panics(t, func() { _, _ = Classify("", All) })
+	t.Run("check panic", func(t *testing.T) { assert.Panics(t, func() { _, _ = Classify("", All) }) })
 }
