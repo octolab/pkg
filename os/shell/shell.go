@@ -23,7 +23,7 @@ func (sh Shell) String() string {
 	case Zsh:
 		return "zsh"
 	case PowerShell:
-		return "pwsh.exe"
+		return "powershell"
 	}
 	return ""
 }
@@ -52,7 +52,7 @@ func Classify(bin string, _ Context) (sh Shell, err error) {
 		sh = Bash
 	case "zsh":
 		sh = Zsh
-	case "pwsh.exe", "powershell.exe":
+	case "powershell", "powershell.exe", "pwsh.exe":
 		sh = PowerShell
 	default:
 		err = fmt.Errorf("shell: cannot classify shell by %q", bin)
