@@ -22,6 +22,8 @@ go:
 - 1.11.x
 - 1.12.x
 
+go_import_path: go.octolab.org
+
 before_script:
 - if [[ $TRAVIS_GO_VERSION == 1.12* ]]; then curl -L $CODECLIMATE > ./cc-test-reporter; fi
 - if [[ $TRAVIS_GO_VERSION == 1.12* ]]; then chmod +x ./cc-test-reporter; fi
@@ -37,5 +39,3 @@ after_script:
 
 notifications:
   slack: octolab:1eMS7IqOArBipiu31jYVd0cN
-
-go_import_path: go.octolab.org
