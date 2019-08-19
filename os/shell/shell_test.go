@@ -18,7 +18,7 @@ func TestClassify(t *testing.T) {
 
 	type test struct {
 		bin  string
-		ctx  Context
+		ctx  Operation
 		skip bool
 		expected
 	}
