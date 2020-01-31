@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
 	. "go.octolab.org/safe"
 )
 
@@ -28,6 +27,8 @@ func TestDo(t *testing.T) {
 		},
 	}
 	for name, test := range tests {
-		t.Run(name, func(t *testing.T) { assert.NotPanics(t, func() { Do(test.action, test.handler) }) })
+		t.Run(name, func(t *testing.T) {
+			assert.NotPanics(t, func() { Do(test.action, test.handler) })
+		})
 	}
 }

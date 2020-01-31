@@ -23,9 +23,24 @@ func TestClassify(t *testing.T) {
 	}
 
 	tests := map[string]test{
-		"sh":   {"/bin/sh", All, false, expected{Sh, nil}},
-		"bash": {"/bin/bash", All, false, expected{Bash, nil}},
-		"zsh":  {"/usr/local/bin/zsh", All, false, expected{Zsh, nil}},
+		"sh": {
+			"/bin/sh",
+			All,
+			false,
+			expected{Sh, nil},
+		},
+		"bash": {
+			"/bin/bash",
+			All,
+			false,
+			expected{Bash, nil},
+		},
+		"zsh": {
+			"/usr/local/bin/zsh",
+			All,
+			false,
+			expected{Zsh, nil},
+		},
 		"PowerShell": {
 			"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
 			All,
@@ -42,7 +57,9 @@ func TestClassify(t *testing.T) {
 			"/usr/local/bin/fish",
 			All,
 			false,
-			expected{err: errors.New(`shell: cannot classify shell by "/usr/local/bin/fish"`)},
+			expected{
+				err: errors.New(`shell: cannot classify shell by "/usr/local/bin/fish"`),
+			},
 		},
 	}
 
@@ -65,5 +82,7 @@ func TestClassify(t *testing.T) {
 		})
 	}
 
-	t.Run("check panic", func(t *testing.T) { assert.Panics(t, func() { _, _ = Classify("", All) }) })
+	t.Run("check panic", func(t *testing.T) {
+		assert.Panics(t, func() { _, _ = Classify("", All) })
+	})
 }

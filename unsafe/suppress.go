@@ -6,12 +6,14 @@ package unsafe
 // * io.Writer interface
 // and allows to ignore it.
 //
-//  DoSilent(fmt.Fprintln(writer, "ignore the result"))
+//  unsafe.DoSilent(fmt.Fprintln(writer, "ignore the result"))
 //
 func DoSilent(interface{}, error) {}
 
 // Ignore accepts an error and allows to ignore it.
 //
-//  Ignore(template.Must(template.New("html").Parse(content)).Execute(writer, data))
+//  unsafe.Ignore(
+//  	template.Must(template.New("html").Parse(content)).Execute(writer, data),
+//  )
 //
 func Ignore(error) {}
