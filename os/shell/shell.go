@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 )
 
+// Shell is a enum to define command-line interpreter.
 type Shell int
 
 const (
@@ -12,8 +13,11 @@ const (
 	Bash                         // https://en.wikipedia.org/wiki/Bash_(Unix_shell)
 	Zsh                          // https://en.wikipedia.org/wiki/Z_shell
 	PowerShell                   // https://en.wikipedia.org/wiki/PowerShell
+
+	Unknown = "unknown"
 )
 
+// String returns the string representation of the enum.
 func (sh Shell) String() string {
 	switch sh {
 	case Sh:
@@ -25,9 +29,10 @@ func (sh Shell) String() string {
 	case PowerShell:
 		return "powershell"
 	}
-	return ""
+	return Unknown
 }
 
+// Operation is a enum to define type of command-line interpreter operation.
 type Operation int
 
 const (
@@ -39,6 +44,7 @@ const (
 	All = Assign | Completion | Exec | Print
 )
 
+// Classify tries to classify passed binary as a command-line interpreter.
 func Classify(bin string, operations ...Operation) (sh Shell, err error) {
 	if bin == "" {
 		panic("shell: cannot classify shell by empty binary name")

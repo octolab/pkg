@@ -5,8 +5,7 @@ import "runtime"
 // Caller returns information about the current caller.
 //
 //  func StoreToDatabase(data Payload) error {
-//  	timer := stats.NewTiming()
-//  	defer timer.Send(runtime.Caller().Name)
+//  	defer stats.NewTiming().Send(runtime.Caller().Name)
 //
 //  	...
 //  }

@@ -6,7 +6,10 @@ import "github.com/pkg/errors"
 // with error and its stack trace if something went wrong.
 //
 //  func Configure(cmd *cobra.Command) {
-//  	fn.Must(func() error { return cmd.MarkFlagRequired("format") })
+//  	fn.Must(
+//  		func() error { return cmd.MarkFlagRequired("file") },
+//  		func() error { return cmd.MarkFlagRequired("format") },
+//  	)
 //  }
 //
 func Must(actions ...func() error) {

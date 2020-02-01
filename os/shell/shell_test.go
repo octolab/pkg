@@ -78,7 +78,7 @@ func TestClassify(t *testing.T) {
 			}
 			assert.Error(t, err)
 			assert.EqualError(t, err, test.expected.err.Error())
-			assert.Empty(t, sh.String())
+			assert.Equal(t, Unknown, sh.String())
 		})
 	}
 
