@@ -6,6 +6,6 @@ package sequence
 //  	// do something five times
 //  }
 //
-func Simple(size int) []int {
-	return make([]int, size)
+func Simple(size int) []struct{} {
+	return make([]struct{}, size)
 }
