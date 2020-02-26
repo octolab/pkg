@@ -1,58 +1,100 @@
-GO111MODULE = on
-GOFLAGS     = -mod=vendor
-GOPROXY     = https://proxy.golang.org,https://gocenter.io,direct
-MODULE      = $(shell go list -m)
-PATHS       = $(shell go list ./... | sed -e "s|$(shell go list -m)/\{0,1\}||g")
-SHELL       = /bin/bash -euo pipefail
-TIMEOUT     = 1s
-
+# sourced by https://github.com/octomation/makefiles
 
 .DEFAULT_GOAL = test-with-coverage
 
-.PHONY: env
-env:
-	@echo "GO111MODULE: $(shell go env GO111MODULE)"
-	@echo "GOFLAGS:     $(shell go env GOFLAGS)"
-	@echo "GOPRIVATE:   $(shell go env GOPRIVATE)"
-	@echo "GOPROXY:     $(shell go env GOPROXY)"
-	@echo "GONOPROXY:   $(shell go env GONOPROXY)"
-	@echo "GOSUMDB:     $(shell go env GOSUMDB)"
-	@echo "GONOSUMDB:   $(shell go env GONOSUMDB)"
-	@echo "MODULE:      $(MODULE)"
-	@echo "PATHS:       $(PATHS)"
-	@echo "SHELL:       $(SHELL)"
-	@echo "TIMEOUT:     $(TIMEOUT)"
+SHELL = /bin/bash -euo pipefail
 
+GO111MODULE = on
+GOFLAGS     = -mod=vendor
+GOPRIVATE   = go.octolab.net
+GOPROXY     = direct
+LOCAL       = $(MODULE)
+MODULE      = `go list -m`
+PACKAGES    = `go list ./... 2> /dev/null`
+PATHS       = $(shell echo $(PACKAGES) | sed -e "s|$(MODULE)/\{0,1\}||g")
+TIMEOUT     = 1s
+
+ifeq (, $(PACKAGES))
+	PACKAGES = $(MODULE)
+endif
+
+ifeq (, $(PATHS))
+	PATHS = .
+endif
+
+export GO111MODULE := $(GO111MODULE)
+export GOFLAGS     := $(GOFLAGS)
+export GOPRIVATE   := $(GOPRIVATE)
+export GOPROXY     := $(GOPROXY)
+
+.PHONY: go-env
+go-env:
+	@echo "GO111MODULE: `go env GO111MODULE`"
+	@echo "GOFLAGS:     $(strip `go env GOFLAGS`)"
+	@echo "GOPRIVATE:   $(strip `go env GOPRIVATE`)"
+	@echo "GOPROXY:     $(strip `go env GOPROXY`)"
+	@echo "LOCAL:       $(LOCAL)"
+	@echo "MODULE:      $(MODULE)"
+	@echo "PACKAGES:    $(PACKAGES)"
+	@echo "PATHS:       $(strip $(PATHS))"
+	@echo "TIMEOUT:     $(TIMEOUT)"
 
 .PHONY: deps
 deps:
-	@go mod tidy && go mod vendor && go mod verify
+	@go mod download
+	@if [[ "`go env GOFLAGS`" =~ -mod=vendor ]]; then go mod vendor; fi
 
-.PHONY: deps-update
-deps-update:
-	@go get -mod= -u all
+.PHONY: deps-clean
+deps-clean:
+	@go clean -modcache
 
+.PHONY: deps-shake
+deps-shake:
+	@go mod tidy
 
-.PHONY: format
-format:
-	@goimports -local $(dir $(shell go list -m)) -ungroup -w $(PATHS)
+.PHONY: update
+update: selector = '{{if not (or .Main .Indirect)}}{{.Path}}{{end}}'
+update:
+	@if command -v egg > /dev/null; then \
+		packages="`egg deps list`"; \
+	else \
+		packages="`go list -f $(selector) -m all`"; \
+	fi; go get -mod= -u $$packages
 
-.PHONY: generate
-generate:
-	@go generate $(MODULE)/...
-
-.PHONY: refresh
-refresh: deps-update deps generate format test-with-coverage
-
+.PHONY: update-all
+update-all:
+	@go get -mod= -u ./...
 
 .PHONY: test
 test:
-	@go test -race -timeout $(TIMEOUT) $(MODULE)/...
+	@go test -race -timeout $(TIMEOUT) $(PACKAGES)
+
+.PHONY: test-clean
+test-clean:
+	@go clean -testcache
 
 .PHONY: test-with-coverage
 test-with-coverage:
-	@go test -cover -timeout $(TIMEOUT) $(MODULE)/... | column -t | sort -r
+	@go test -cover -timeout $(TIMEOUT) $(PACKAGES) | column -t | sort -r
 
 .PHONY: test-with-coverage-profile
 test-with-coverage-profile:
-	@go test -cover -covermode count -coverprofile c.out -timeout $(TIMEOUT) $(MODULE)/...
+	@go test -cover -covermode count -coverprofile c.out -timeout $(TIMEOUT) $(PACKAGES)
+
+.PHONY: format
+format:
+	@goimports -local $(LOCAL) -ungroup -w $(PATHS)
+
+.PHONY: generate
+generate:
+	@go generate $(PACKAGES)
+
+
+.PHONY: clean
+clean: deps-clean test-clean
+
+.PHONY: env
+env: go-env
+
+.PHONY: refresh
+refresh: deps-shake update deps generate format test
