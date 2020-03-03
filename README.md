@@ -3,10 +3,10 @@
 > Go packages.
 
 [![Build][build.icon]][build.page]
-[![Quality][quality.icon]][quality.page]
 [![Documentation][docs.icon]][docs.page]
-[![Coverage][coverage.icon]][coverage.page]
+[![Quality][quality.icon]][quality.page]
 [![Template][template.icon]][template.page]
+[![Coverage][coverage.icon]][coverage.page]
 
 ## 🧩 Integration
 
@@ -15,7 +15,7 @@ The library uses [SemVer](https://semver.org) for versioning, and it is not
 You can use [go modules](https://github.com/golang/go/wiki/Modules) to manage its version.
 
 ```bash
-$ go get -u go.octolab.org@latest
+$ go get go.octolab.org@latest
 ```
 
 ---
