@@ -1,11 +1,12 @@
-package fn_test
+package timer_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	. "go.octolab.org/fn"
+
+	. "go.octolab.org/fn/timer"
 )
 
 func TestStopwatch(t *testing.T) {
