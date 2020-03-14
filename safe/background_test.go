@@ -1,6 +1,7 @@
 package safe_test
 
 import (
+	"errors"
 	"sync/atomic"
 	"testing"
 
@@ -19,7 +20,15 @@ func TestBackground(t *testing.T) {
 			return nil
 		}, nil)
 	}
+	job.Do(
+		func() error { return errors.New("test") },
+		func(error) { atomic.AddUint32(&spy, 1) },
+	)
+	job.Do(
+		func() error { panic("at the Disco") },
+		func(error) { atomic.AddUint32(&spy, 1) },
+	)
 
 	job.Wait()
-	assert.Equal(t, uint32(10), spy)
+	assert.Equal(t, uint32(12), spy)
 }
