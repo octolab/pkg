@@ -11,10 +11,10 @@ import (
 	. "go.octolab.org/safe"
 )
 
-func TestBackground(t *testing.T) {
+func TestJob(t *testing.T) {
 	var spy uint32
 
-	job := Background()
+	job := new(Job)
 	for range make([]struct{}, 10) {
 		job.Do(func() error {
 			atomic.AddUint32(&spy, 1)
@@ -43,7 +43,7 @@ func BenchmarkBackground(b *testing.B) {
 	b.Run("without error", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			job := Background()
+			job := new(Job)
 			job.Do(func() error { return nil }, nil)
 			job.Wait()
 		}
@@ -51,7 +51,7 @@ func BenchmarkBackground(b *testing.B) {
 	b.Run("with error", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			job := Background()
+			job := new(Job)
 			job.Do(func() error { return errors.New("test") }, func(error) {})
 			job.Wait()
 		}
@@ -59,7 +59,7 @@ func BenchmarkBackground(b *testing.B) {
 	b.Run("with panic", func(b *testing.B) {
 		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
-			job := Background()
+			job := new(Job)
 			job.Do(func() error { panic(errors.New("at the Disco")) }, func(error) {})
 			job.Wait()
 		}
