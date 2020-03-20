@@ -1,6 +1,31 @@
 package io
 
-import "io"
+import (
+	"bytes"
+	"io"
+	"io/ioutil"
+)
+
+func RepeatableReadCloser(body io.ReadCloser, buf *bytes.Buffer) io.ReadCloser {
+	return &repeatable{src: TeeReadCloser(body, buf), dst: buf}
+}
+
+type repeatable struct {
+	src io.ReadCloser
+	dst *bytes.Buffer
+}
+
+func (r *repeatable) Read(p []byte) (n int, err error) {
+	n, err = r.src.Read(p)
+	if n < len(p) && (err == nil || err == io.EOF) {
+		buf := bytes.NewBuffer(make([]byte, 0, r.dst.Len()))
+		r.src, r.dst = TeeReadCloser(ioutil.NopCloser(r.dst), buf), buf
+		err = io.EOF
+	}
+	return
+}
+
+func (r *repeatable) Close() error { return r.src.Close() }
 
 // TeeReadCloser returns a ReadCloser that writes to w what it reads from rc.
 // All reads from rc performed through it are matched with
