@@ -21,6 +21,7 @@ $ go get go.octolab.org@latest
 ## ©️ Included
 
 - [github.com/AlekSi/pointer](https://github.com/AlekSi/pointer), MIT License
+- [github.com/andrepolischuk/numd-go](https://github.com/andrepolischuk/numd-go), MIT License
 
 ---
 
