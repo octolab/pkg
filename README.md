@@ -18,6 +18,10 @@ You can use [go modules](https://github.com/golang/go/wiki/Modules) to manage it
 $ go get go.octolab.org@latest
 ```
 
+## ©️ Included
+
+- [github.com/AlekSi/pointer](https://github.com/AlekSi/pointer), MIT License
+
 ---
 
 made with ❤️ for everyone
