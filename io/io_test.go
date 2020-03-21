@@ -10,20 +10,22 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	. "go.octolab.org/io"
+	"go.octolab.org/safe"
+	"go.octolab.org/unsafe"
 )
 
 func TestRepeatableReadCloser(t *testing.T) {
 	t.Run("repeatable request", func(t *testing.T) {
 		payload := `{"payload": "test"}`
 		req, err := http.NewRequest(
-			http.MethodPost,
-			"/",
+			http.MethodPost, "/",
 			RepeatableReadCloser(
 				ioutil.NopCloser(strings.NewReader(payload)),
 				bytes.NewBuffer(make([]byte, 0, len(payload))),
@@ -91,6 +93,45 @@ func TestRepeatableReadCloser(t *testing.T) {
 	})
 }
 
+func ExampleRepeatableReadCloser() {
+	i, responses := int32(-1), []int{
+		http.StatusInternalServerError,
+		http.StatusServiceUnavailable,
+		http.StatusOK,
+	}
+
+	var (
+		handler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Request) {
+			unsafe.DoSilent(ioutil.ReadAll(req.Body))
+			unsafe.Ignore(req.Body.Close())
+
+			code := responses[atomic.AddInt32(&i, 1)]
+			http.Error(rw, http.StatusText(code), code)
+		}
+
+		request = http.Request{
+			Method: http.MethodPost,
+			Body: RepeatableReadCloser(
+				ioutil.NopCloser(strings.NewReader("echo")),
+				bytes.NewBuffer(make([]byte, 0, 4)),
+			),
+		}
+	)
+
+	for {
+		recorder := httptest.NewRecorder()
+		handler.ServeHTTP(recorder, &request)
+		unsafe.DoSilent(io.Copy(os.Stdout, recorder.Body))
+		if recorder.Code == http.StatusOK {
+			break
+		}
+	}
+	// output:
+	// Internal Server Error
+	// Service Unavailable
+	// OK
+}
+
 func TestTeeReadCloser(t *testing.T) {
 	payload := "invalid json"
 	req, err := http.NewRequest(http.MethodPost, "/", strings.NewReader(payload))
@@ -107,6 +148,32 @@ func TestTeeReadCloser(t *testing.T) {
 		assert.Equal(t, payload, buf.String())
 	}
 	handler.ServeHTTP(httptest.NewRecorder(), req)
+}
+
+func ExampleTeeReadCloser() {
+	var (
+		handler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Request) {
+			buf := bytes.NewBuffer(make([]byte, 0, req.ContentLength))
+			body := TeeReadCloser(req.Body, buf)
+			defer safe.Close(body, unsafe.Ignore)
+
+			var payload interface{}
+			if err := json.NewDecoder(body).Decode(&payload); err != nil {
+				http.Error(rw, fmt.Sprintf("invalid json: %s", buf.String()), http.StatusBadRequest)
+			}
+		}
+
+		request = http.Request{
+			Method: http.MethodPost,
+			Body:   ioutil.NopCloser(strings.NewReader(`{bad: "json"}`)),
+		}
+	)
+
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, &request)
+	unsafe.DoSilent(io.Copy(os.Stdout, recorder.Body))
+	// output:
+	// invalid json: {bad: "json"}
 }
 
 // helpers
