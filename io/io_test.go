@@ -102,7 +102,7 @@ func ExampleRepeatableReadCloser() {
 
 	var (
 		handler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Request) {
-			unsafe.DoSilent(ioutil.ReadAll(req.Body))
+			unsafe.DoSilent(io.Copy(ioutil.Discard, req.Body))
 			unsafe.Ignore(req.Body.Close())
 
 			code := responses[atomic.AddInt32(&i, 1)]
@@ -159,7 +159,8 @@ func ExampleTeeReadCloser() {
 
 			var payload interface{}
 			if err := json.NewDecoder(body).Decode(&payload); err != nil {
-				http.Error(rw, fmt.Sprintf("invalid json: %s", buf.String()), http.StatusBadRequest)
+				message := fmt.Sprintf("invalid json: %s", buf.String())
+				http.Error(rw, message, http.StatusBadRequest)
 			}
 		}
 
