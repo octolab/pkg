@@ -28,10 +28,10 @@ var _ = map[string]RelationT{
 
 // T provides functionality to produce increasing sequence of numbers.
 //
-//  generator, sequence := new(sequence.T).At(7), make([]entity.ID, 4)
+//  uid, ids := new(generator.T).At(7), make([]entity.ID, 4)
 //
-//  for i := range sequence.Simple(len(sequence)) {
-//  	sequence[i] = entity.ID(generator.Next())
+//  for i := range sequence.Simple(len(ids)) {
+//  	ids[i] = entity.ID(uid.Next())
 //  }
 //
 type T uint64

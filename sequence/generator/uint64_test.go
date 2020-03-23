@@ -1,14 +1,15 @@
-package sequence_test
+package generator_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	. "go.octolab.org/sequence"
+
+	. "go.octolab.org/sequence/generator"
 )
 
-func TestGenerator(t *testing.T) {
-	generator := new(GeneratorUint64).At(10)
+func TestUint64(t *testing.T) {
+	generator := new(Uint64).At(10)
 
 	assert.Equal(t, uint64(10), generator.Current())
 	assert.Equal(t, uint64(11), generator.Next())
