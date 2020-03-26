@@ -2,18 +2,36 @@ package timer
 
 import "time"
 
-// Deadline return a corrector for go.octolab.org/toolkit/protocol/http/header.Deadline.
-// It useful for go.octolab.org/toolkit/protocol/http/middleware.Deadline.
+// Deadline return a time corrector.
+//
+// It useful for go.octolab.org/toolkit/protocol/http/header.Deadline
+// and go.octolab.org/toolkit/protocol/http/middleware.Deadline.
 //
 //  mux := http.NewServeMux()
 //
-//  {
-//  	handler := http.HandlerFunc(...)
-//  	sla := middleware.Deadline(time.Second, timer.Deadline(0.95, time.Millisecond))
-//  	mux.Handle("/", sla(handler))
-//  }
+//  sla := middleware.Deadline(time.Second, timer.Deadline(0.95, time.Millisecond))
+//  handler := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})
+//  mux.Handle("/", sla(handler))
 //
-//  log.Fatal(http.ListenAndServe(":80", http.TimeoutHandler(mux, time.Second, "...")))
+//  log.Fatal(http.ListenAndServe(":80", mux))
+//
+// It also useful for the built-in context package.
+//
+//  func(rw http.ResponseWriter, req *http.Request) {
+//  	ctx := req.Context()
+//
+//  	corrector := timer.Deadline(0.95, time.Millisecond)
+//  	ctx, cancel := context.WithDeadline(req.Context(), corrector(ctx.Deadline()))
+//  	defer cancel()
+//
+//  	select {
+//  	case <-ctx.Done():
+//  		message := http.StatusText(http.StatusRequestTimeout)
+//  		http.Error(rw, message, http.StatusRequestTimeout)
+//  	case result := <-rpc.Call(ctx):
+//  		unsafe.Ignore(json.NewEncoder(rw).Encode(result))
+//  	}
+//  }
 //
 func Deadline(correction float32, threshold time.Duration) func(time.Time, bool) time.Time {
 	return func(deadline time.Time, present bool) time.Time {
@@ -30,18 +48,18 @@ func Deadline(correction float32, threshold time.Duration) func(time.Time, bool)
 	}
 }
 
-// Timeout return a corrector for go.octolab.org/toolkit/protocol/http/header.Timeout.
-// It useful for go.octolab.org/toolkit/protocol/http/middleware.Timeout.
+// Timeout return a duration corrector.
+//
+// It useful for go.octolab.org/toolkit/protocol/http/header.Timeout
+// and go.octolab.org/toolkit/protocol/http/middleware.Timeout.
 //
 //  mux := http.NewServeMux()
 //
-//  {
-//  	handler := http.HandlerFunc(...)
-//  	sla := middleware.Timeout(time.Second, timer.Timeout(0.95, time.Millisecond))
-//  	mux.Handle("/", sla(handler))
-//  }
+//  sla := middleware.Timeout(time.Second, timer.Timeout(0.95, time.Millisecond))
+//  handler := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})
+//  mux.Handle("/", sla(handler))
 //
-//  log.Fatal(http.ListenAndServe(":80", http.TimeoutHandler(mux, time.Second, "...")))
+//  log.Fatal(http.ListenAndServe(":80", mux))
 //
 func Timeout(correction float32, threshold time.Duration) func(time.Duration, bool) time.Duration {
 	return func(timeout time.Duration, present bool) time.Duration {
