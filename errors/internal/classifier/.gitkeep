@@ -1,0 +1,11 @@
+TODO:
+- make it friendly with github.com/pkg/errors via causer interface
+- make it friendly with github.com/kamilsk/retry
+```go
+func Whitelist(errors ...error) Strategy {
+	whitelist := classifier.WhitelistClassifier(errors)
+	return func(attempt uint, err error) bool {
+		return whitelist.Classify(err) == classifier.Retry
+	}
+}
+```
