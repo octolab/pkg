@@ -33,6 +33,18 @@ type Retriable interface {
 // Unwrap returns the result of calling the Unwrap or Cause methods
 // on the error, otherwise it returns error itself.
 //
+//  func Caller(req *http.Request) error {
+//  	resp, err := http.DefaultClient.Do(req)
+//  	if err != nil {
+//  		return errors.WithStack(fmt.Errorf("caller: %w", err))
+//  	}
+//  	...
+//  }
+//
+//  if err, is := Unwrap(Caller(req)).(net.Error); is {
+//  	...
+//  }
+//
 // It is compatible with github.com/pkg/errors
 // and built-in errors since 1.13.
 func Unwrap(err error) error {
