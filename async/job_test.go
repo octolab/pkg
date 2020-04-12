@@ -1,4 +1,4 @@
-package safe_test
+package async_test
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	. "go.octolab.org/safe"
+	. "go.octolab.org/async"
 )
 
 func TestJob(t *testing.T) {

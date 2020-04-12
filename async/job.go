@@ -1,10 +1,14 @@
-package safe
+package async
 
-import "sync"
+import (
+	"sync"
+
+	"go.octolab.org/safe"
+)
 
 // A Job provides a top level API above the sync.WaitGroup.
 //
-//  job := new(safe.Job)
+//  job := new(async.Job)
 //  for _, action := range jobs {
 //  	job.Do(action, logger)
 //  }
@@ -17,7 +21,7 @@ type Job sync.WaitGroup
 // If an error is not nil, it passes it to the handler.
 func (job *Job) Do(action func() error, handler func(error)) {
 	(*sync.WaitGroup)(job).Add(1)
-	go Do(func() error {
+	go safe.Do(func() error {
 		if err := action(); err != nil {
 			return err
 		}

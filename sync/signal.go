@@ -16,7 +16,7 @@ const ErrSignalTrapped errors.Message = "signal trapped"
 // Termination returns trap for termination signals.
 //
 //  server := new(http.Server)
-//  go log.Println(server.ListenAndServe())
+//  go safe.Do(server.ListenAndServe, func(err error) { log.Println(err) })
 //
 //  err := sync.Termination().Wait(context.Background())
 //  if err == sync.ErrSignalTrapped {
