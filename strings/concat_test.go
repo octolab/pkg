@@ -7,6 +7,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/stretchr/testify/assert"
+
 	. "go.octolab.org/strings"
 )
 

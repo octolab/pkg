@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
 	. "go.octolab.org/sync"
 )
 
@@ -22,8 +23,7 @@ func TestTermination(t *testing.T) {
 				proc, err := os.FindProcess(os.Getpid())
 				assert.NoError(t, err)
 				assert.NoError(t, proc.Signal(os.Interrupt))
-				time.Sleep(delta)
-				cancel()
+				time.AfterFunc(delta, cancel)
 			},
 			ErrSignalTrapped,
 		},
