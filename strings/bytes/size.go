@@ -8,18 +8,18 @@ import (
 	"go.octolab.org/errors"
 )
 
-const (
-	// ErrInvalidByteQuantity is returned by the ParseSize
-	// when the passed string is invalid.
-	ErrInvalidByteQuantity errors.Message = "byte quantity must be a positive integer with a unit of measurement like M, MB, MiB, etc"
+// ErrInvalidByteQuantity is returned by the ParseSize
+// when the passed string is invalid.
+const ErrInvalidByteQuantity errors.Message = "byte quantity must be a positive integer with a unit of measurement like M, MB, MiB, etc"
 
-	_ = 1 << (10 * iota)
-	kilobyte
-	megabyte
-	gigabyte
-	terabyte
-	petabyte
-	exabyte
+const (
+	Byte = 1 << (10 * iota)
+	Kilobyte
+	Megabyte
+	Gigabyte
+	Terabyte
+	Petabyte
+	Exabyte
 )
 
 // A Size represents a size of digital information.
@@ -41,24 +41,24 @@ func (size Size) String() string {
 	value := float64(size)
 
 	switch {
-	case size >= exabyte:
+	case size >= Exabyte:
 		unit = 'E'
-		value = value / exabyte
-	case size >= petabyte:
+		value = value / Exabyte
+	case size >= Petabyte:
 		unit = 'P'
-		value = value / petabyte
-	case size >= terabyte:
+		value = value / Petabyte
+	case size >= Terabyte:
 		unit = 'T'
-		value = value / terabyte
-	case size >= gigabyte:
+		value = value / Terabyte
+	case size >= Gigabyte:
 		unit = 'G'
-		value = value / gigabyte
-	case size >= megabyte:
+		value = value / Gigabyte
+	case size >= Megabyte:
 		unit = 'M'
-		value = value / megabyte
-	case size >= kilobyte:
+		value = value / Megabyte
+	case size >= Kilobyte:
 		unit = 'K'
-		value = value / kilobyte
+		value = value / Kilobyte
 	default:
 		unit = 'B'
 	}
@@ -94,17 +94,17 @@ func ParseSize(s string) (Size, error) {
 	var size Size
 	switch multiple {
 	case "E", "EB", "EIB":
-		size = Size(bytes * exabyte)
+		size = Size(bytes * Exabyte)
 	case "P", "PB", "PIB":
-		size = Size(bytes * petabyte)
+		size = Size(bytes * Petabyte)
 	case "T", "TB", "TIB":
-		size = Size(bytes * terabyte)
+		size = Size(bytes * Terabyte)
 	case "G", "GB", "GIB":
-		size = Size(bytes * gigabyte)
+		size = Size(bytes * Gigabyte)
 	case "M", "MB", "MIB":
-		size = Size(bytes * megabyte)
+		size = Size(bytes * Megabyte)
 	case "K", "KB", "KIB":
-		size = Size(bytes * kilobyte)
+		size = Size(bytes * Kilobyte)
 	case "B":
 		size = Size(bytes)
 	default:
