@@ -20,6 +20,7 @@ func TestRange(t *testing.T) {
 		"multiply": {21, 7, []int{7, 14, 21}},
 		"common":   {17, 7, []int{7, 14, 17}},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert.Equal(t, test.expected, Range(test.size, test.batch))

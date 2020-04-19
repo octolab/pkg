@@ -31,6 +31,7 @@ func TestMust(t *testing.T) {
 			assert.NotPanics,
 		},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			test.assert(t, func() { Must(test.actions...) })

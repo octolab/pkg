@@ -15,6 +15,7 @@ func TestSimple(t *testing.T) {
 		"constant": 5,
 		"random":   rand.New(rand.NewSource(time.Now().UnixNano())).Intn(1000),
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert.Len(t, Simple(test), test)

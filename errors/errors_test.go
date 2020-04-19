@@ -10,14 +10,14 @@ import (
 	. "go.octolab.org/errors"
 )
 
-const expected Message = "test"
+const expected Message = "error"
 
 func TestMessage(t *testing.T) {
 	caller := func() error {
-		return Message("test")
+		return Message("error")
 	}
 	assert.Equal(t, expected, caller())
-	assert.EqualError(t, caller(), "test")
+	assert.EqualError(t, caller(), expected.Error())
 	assert.True(t, expected == caller())
 }
 

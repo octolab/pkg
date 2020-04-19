@@ -30,11 +30,13 @@ func TestVersion_Compare(t *testing.T) {
 		"much later": {GoVersion{}, GoVersion.Later},
 		"equal":      {version, GoVersion.Equal},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert.True(t, test.compare(version, test.target))
 		})
 	}
+
 	t.Run("full comparison", func(t *testing.T) {
 		base := GoVersion{Major: 1, Minor: 9}
 		v1, v2, v3 := base, base, base

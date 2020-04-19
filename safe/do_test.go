@@ -27,6 +27,7 @@ func TestDo(t *testing.T) {
 			func(error) { t.Fail() },
 		},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert.NotPanics(t, func() { Do(test.action, test.handler) })

@@ -41,6 +41,7 @@ func TestRepeatableReadCloser(t *testing.T) {
 			require.NoError(t, req.Body.Close())
 			require.Equal(t, "test", obtained.Payload)
 		}
+
 		for i := range make([]struct{}, 10) {
 			iteration := fmt.Sprintf("iteration #%d", i+1)
 			t.Run(iteration, func(t *testing.T) {

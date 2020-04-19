@@ -19,6 +19,7 @@ func TestConcat(t *testing.T) {
 		"nothing to pass": {},
 		"simple usage":    {[]string{"127.0.0.1", ":", "80"}, "127.0.0.1:80"},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert.Equal(t, test.expected, Concat(test.strings...))

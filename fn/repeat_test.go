@@ -16,6 +16,7 @@ func TestRepeat(t *testing.T) {
 		"constant times": 5,
 		"random times":   rand.New(rand.NewSource(time.Now().UnixNano())).Intn(1000),
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var counter int

@@ -34,6 +34,7 @@ func TestTermination(t *testing.T) {
 			context.Canceled,
 		},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())

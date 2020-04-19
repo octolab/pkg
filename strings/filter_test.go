@@ -16,6 +16,7 @@ func TestFirstValid(t *testing.T) {
 		"nothing to pass": {},
 		"simple usage":    {[]string{"", "", "third", "fourth"}, "third"},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert.Equal(t, test.expected, FirstNotEmpty(test.strings...))
@@ -34,6 +35,7 @@ func TestNotEmpty(t *testing.T) {
 			[]string{"one", "two", "three"},
 		},
 	}
+
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert.Equal(t, test.expected, NotEmpty(test.strings))
