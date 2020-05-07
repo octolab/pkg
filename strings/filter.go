@@ -20,3 +20,17 @@ func NotEmpty(strings []string) []string {
 	}
 	return filtered
 }
+
+// Unique filters non-unique strings in-place.
+func Unique(strings []string) []string {
+	registry := map[string]struct{}{}
+	filtered := strings[:0]
+	for _, str := range strings {
+		if _, present := registry[str]; present {
+			continue
+		}
+		registry[str] = struct{}{}
+		filtered = append(filtered, str)
+	}
+	return filtered
+}
