@@ -5,7 +5,7 @@ import "time"
 // ToBoolOrNil returns a pointer to the passed bool value,
 // or nil, if passed value is a zero value.
 func ToBoolOrNil(b bool) *bool {
-	if b == false {
+	if !b {
 		return nil
 	}
 	return &b

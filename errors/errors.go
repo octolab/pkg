@@ -17,9 +17,16 @@ package errors
 //
 type Message string
 
-// Message returns a string representation of the error.
+// Error returns a string representation of the error.
 func (err Message) Error() string {
 	return string(err)
+}
+
+// Recovered represents a recovered error.
+type Recovered interface {
+	error
+	// Cause returns the original cause of panic.
+	Cause() interface{}
 }
 
 // Retriable represents a retriable error.

@@ -71,7 +71,7 @@ func BenchmarkBackground(b *testing.B) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				defer func() { recover() }()
+				defer func() { _ = recover() }()
 				panic(errors.New("at the Disco"))
 			}()
 			wg.Wait()
