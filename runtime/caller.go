@@ -1,6 +1,10 @@
 package runtime
 
-import "runtime"
+import (
+	"path"
+	"runtime"
+	"strings"
+)
 
 // Caller returns information about the current caller.
 //
@@ -23,4 +27,13 @@ type CallerInfo struct {
 	Name string
 	File string
 	Line int
+}
+
+func (info CallerInfo) Meta() (pkg, receiver, method string) {
+	base, raw := path.Split(info.Name)
+	parts := strings.Split(raw, ".")
+	if len(parts) == 3 {
+		return base + parts[0], strings.Trim(parts[1], "()"), parts[2]
+	}
+	return base + parts[0], "", parts[1]
 }

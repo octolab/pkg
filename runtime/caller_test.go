@@ -29,68 +29,136 @@ func TestCaller(t *testing.T) {
 		return control.After(release)
 	}
 
+	type expected struct {
+		name                  string
+		pkg, receiver, method string
+	}
+
 	tests := map[string]struct {
 		caller   func() CallerInfo
-		expected string
+		expected expected
 	}{
-		"direct caller": {
-			callerA,
-			"go.octolab.org/runtime_test.callerA",
+		"direct method call": {
+			new(structure).callA,
+			expected{
+				"go.octolab.org/runtime_test.structure.callA",
+				"go.octolab.org/runtime_test", "structure", "callA",
+			},
 		},
-		"direct caller (alt)": {
-			altCallerA,
-			"go.octolab.org/runtime_test.altCallerA",
+		"proxy method call": {
+			new(structure).proxyCallA,
+			expected{
+				"go.octolab.org/runtime_test.structure.callA",
+				"go.octolab.org/runtime_test", "structure", "callA",
+			},
 		},
-		"chain caller": {
-			callerB,
-			"go.octolab.org/runtime_test.callerA",
+		"direct method call, pointer": {
+			new(structure).callB,
+			expected{
+				"go.octolab.org/runtime_test.(*structure).callB",
+				"go.octolab.org/runtime_test", "*structure", "callB",
+			},
 		},
-		"chain caller (alt)": {
-			altCallerB,
-			"go.octolab.org/runtime_test.altCallerA",
+		"proxy method call, pointer": {
+			new(structure).proxyCallB,
+			expected{
+				"go.octolab.org/runtime_test.(*structure).callB",
+				"go.octolab.org/runtime_test", "*structure", "callB",
+			},
 		},
-		"lambda caller": {
-			callerC,
-			func() string {
+		"call by function type": {
+			function(Caller).call,
+			expected{
+				"go.octolab.org/runtime_test.function.call-fm",
+				"go.octolab.org/runtime_test", "function", "call-fm",
+			},
+		},
+		"call by primitive type": {
+			new(integer).call,
+			expected{
+				"go.octolab.org/runtime_test.integer.call-fm",
+				"go.octolab.org/runtime_test", "integer", "call-fm",
+			},
+		},
+		"direct function call": {
+			callA,
+			expected{
+				"go.octolab.org/runtime_test.callA",
+				"go.octolab.org/runtime_test", "", "callA",
+			},
+		},
+		"direct function call (alt)": {
+			altCallA,
+			expected{
+				"go.octolab.org/runtime_test.altCallA",
+				"go.octolab.org/runtime_test", "", "altCallA",
+			},
+		},
+		"proxy function call": {
+			proxyCallA,
+			expected{
+				"go.octolab.org/runtime_test.callA",
+				"go.octolab.org/runtime_test", "", "callA",
+			},
+		},
+		"proxy function call (alt)": {
+			altProxyCallA,
+			expected{
+				"go.octolab.org/runtime_test.altCallA",
+				"go.octolab.org/runtime_test", "", "altCallA",
+			},
+		},
+		"lambda call": {
+			callB,
+			func() expected {
 				if ahead(t, Version(), go112) {
 					// https://golang.org/doc/go1.12#runtime
-					return "go.octolab.org/runtime_test.callerC"
+					return expected{
+						"go.octolab.org/runtime_test.callB",
+						"go.octolab.org/runtime_test", "", "callB",
+					}
 				}
-				return "go.octolab.org/runtime_test.callerC.func1"
+				return expected{
+					"go.octolab.org/runtime_test.callB.func1",
+					"go.octolab.org/runtime_test", "callB", "func1", // TODO:invalid
+				}
 			}(),
 		},
-		"lambda caller (alt)": {
-			altCallerC,
-			func() string {
-				return "go.octolab.org/runtime_test.altCallerC.func1"
-			}(),
+		"lambda call (alt)": {
+			altCallB,
+			expected{
+				"go.octolab.org/runtime_test.altCallB.func1",
+				"go.octolab.org/runtime_test", "altCallB", "func1", // TODO:invalid
+			},
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, test.expected, test.caller().Name)
+			caller := test.caller()
+			pkg, receiver, method := caller.Meta()
+			assert.Equal(t, test.expected, expected{caller.Name, pkg, receiver, method})
 		})
 	}
 }
 
-// BenchmarkCaller/direct_caller-4         	 3024363	       392 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCaller/direct_caller_(alt)-4   	 1881876	       651 ns/op	     216 B/op	       2 allocs/op
-// BenchmarkCaller/chain_caller-4          	 3015570	       382 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCaller/chain_caller_(alt)-4    	 1732618	       647 ns/op	     216 B/op	       2 allocs/op
-// BenchmarkCaller/lambda_caller-4         	 2273673	       516 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCaller/lambda_caller_(alt)-4   	 1224558	       973 ns/op	     280 B/op	       3 allocs/op
+// BenchmarkCaller/direct_function_call-4         	 3079887	       376 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCaller/direct_function_call_(alt)-4   	 1883188	       628 ns/op	     216 B/op	       2 allocs/op
+// BenchmarkCaller/proxy_function_call-4          	 3146109	       377 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCaller/proxy_function_call_(alt)-4    	 1847580	       642 ns/op	     216 B/op	       2 allocs/op
+// BenchmarkCaller/lambda_call-4                  	 2390946	       506 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCaller/lambda_call_(alt)-4            	 1188115	       946 ns/op	     280 B/op	       3 allocs/op
 func BenchmarkCaller(b *testing.B) {
 	benchmarks := []struct {
 		name   string
 		caller func() CallerInfo
 	}{
-		{"direct caller", callerA},
-		{"direct caller (alt)", altCallerA},
-		{"chain caller", callerB},
-		{"chain caller (alt)", altCallerB},
-		{"lambda caller", callerC},
-		{"lambda caller (alt)", altCallerC},
+		{"direct function call", callA},
+		{"direct function call (alt)", altCallA},
+		{"proxy function call", proxyCallA},
+		{"proxy function call (alt)", altProxyCallA},
+		{"lambda call", callB},
+		{"lambda call (alt)", altCallB},
 	}
 	for _, bm := range benchmarks {
 		b.Run(bm.name, func(b *testing.B) {
@@ -102,38 +170,72 @@ func BenchmarkCaller(b *testing.B) {
 	}
 }
 
-func alternateCaller() CallerInfo {
+// helpers
+
+type structure struct{}
+
+//go:noinline prevent to inline in proxyCallA
+func (structure) callA() CallerInfo {
+	return Caller()
+}
+
+func (caller structure) proxyCallA() CallerInfo {
+	return caller.callA()
+}
+
+//go:noinline prevent to inline in proxyCallB
+func (*structure) callB() CallerInfo {
+	return Caller()
+}
+
+func (caller *structure) proxyCallB() CallerInfo {
+	return caller.callB()
+}
+
+type function func() CallerInfo
+
+func (fn function) call() CallerInfo {
+	return fn()
+}
+
+type integer int
+
+func (integer) call() CallerInfo {
+	return Caller()
+}
+
+//go:noinline prevent to inline in proxyCallA
+func callA() CallerInfo {
+	return Caller()
+}
+
+func proxyCallA() CallerInfo {
+	return callA()
+}
+
+func callB() CallerInfo {
+	return func() CallerInfo {
+		return Caller()
+	}()
+}
+
+func altCaller() CallerInfo {
 	pc, file, line, _ := runtime.Caller(1)
 	f := runtime.FuncForPC(pc)
 	return CallerInfo{Name: f.Name(), File: file, Line: line}
 }
 
 //go:noinline
-func callerA() CallerInfo {
-	return Caller()
+func altCallA() CallerInfo {
+	return altCaller()
 }
 
-func callerB() CallerInfo {
-	return callerA()
+func altProxyCallA() CallerInfo {
+	return altCallA()
 }
 
-func callerC() CallerInfo {
+func altCallB() CallerInfo {
 	return func() CallerInfo {
-		return Caller()
-	}()
-}
-
-//go:noinline
-func altCallerA() CallerInfo {
-	return alternateCaller()
-}
-
-func altCallerB() CallerInfo {
-	return altCallerA()
-}
-
-func altCallerC() CallerInfo {
-	return func() CallerInfo {
-		return alternateCaller()
+		return altCaller()
 	}()
 }
