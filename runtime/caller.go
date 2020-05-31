@@ -29,6 +29,7 @@ type CallerInfo struct {
 	Line int
 }
 
+// Meta returns package, receiver and method names.
 func (info CallerInfo) Meta() (pkg, receiver, method string) {
 	base, raw := path.Split(info.Name)
 	parts := strings.Split(raw, ".")

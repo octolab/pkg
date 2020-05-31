@@ -11,7 +11,7 @@ import (
 )
 
 func TestUUID(t *testing.T) {
-	generator, checks := new(UUID), 10<<7
+	generator, checks := new(UUID), 10<<5
 
 	collision := make(map[string]struct{}, checks)
 	for range make([]struct{}, checks) {

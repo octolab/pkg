@@ -68,17 +68,35 @@ func TestCaller(t *testing.T) {
 		},
 		"call by function type": {
 			function(Caller).call,
-			expected{
-				"go.octolab.org/runtime_test.function.call-fm",
-				"go.octolab.org/runtime_test", "function", "call-fm",
-			},
+			func() expected {
+				if ahead(t, Version(), go112) {
+					// https://golang.org/doc/go1.12#runtime
+					return expected{
+						"go.octolab.org/runtime_test.function.call-fm",
+						"go.octolab.org/runtime_test", "function", "call-fm",
+					}
+				}
+				return expected{
+					"go.octolab.org/runtime_test.function.call",
+					"go.octolab.org/runtime_test", "function", "call",
+				}
+			}(),
 		},
 		"call by primitive type": {
 			new(integer).call,
-			expected{
-				"go.octolab.org/runtime_test.integer.call-fm",
-				"go.octolab.org/runtime_test", "integer", "call-fm",
-			},
+			func() expected {
+				if ahead(t, Version(), go112) {
+					// https://golang.org/doc/go1.12#runtime
+					return expected{
+						"go.octolab.org/runtime_test.integer.call-fm",
+						"go.octolab.org/runtime_test", "integer", "call-fm",
+					}
+				}
+				return expected{
+					"go.octolab.org/runtime_test.integer.call",
+					"go.octolab.org/runtime_test", "integer", "call",
+				}
+			}(),
 		},
 		"direct function call": {
 			callA,
