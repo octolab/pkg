@@ -2,9 +2,12 @@ package runtime
 
 import (
 	"path"
+	"regexp"
 	"runtime"
 	"strings"
 )
+
+var lambda = regexp.MustCompile(`func\d+$`)
 
 // Caller returns information about the current caller.
 //
@@ -33,7 +36,13 @@ type CallerInfo struct {
 func (info CallerInfo) Meta() (pkg, receiver, method string) {
 	base, raw := path.Split(info.Name)
 	parts := strings.Split(raw, ".")
+	if len(parts) == 4 {
+		return base + parts[0], strings.Trim(parts[1], "()"), parts[2] + "." + parts[3]
+	}
 	if len(parts) == 3 {
+		if strings.HasPrefix(parts[2], "func") && lambda.MatchString(parts[2]) {
+			return base + parts[0], "", parts[1] + "." + parts[2]
+		}
 		return base + parts[0], strings.Trim(parts[1], "()"), parts[2]
 	}
 	return base + parts[0], "", parts[1]

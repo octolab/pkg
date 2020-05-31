@@ -66,6 +66,13 @@ func TestCaller(t *testing.T) {
 				"go.octolab.org/runtime_test", "*structure", "callB",
 			},
 		},
+		"deep dive call": {
+			new(structure).callC,
+			expected{
+				"go.octolab.org/runtime_test.structure.callC.func2",
+				"go.octolab.org/runtime_test", "structure", "callC.func2",
+			},
+		},
 		"call by function type": {
 			function(Caller).call,
 			func() expected {
@@ -138,7 +145,7 @@ func TestCaller(t *testing.T) {
 				}
 				return expected{
 					"go.octolab.org/runtime_test.callB.func1",
-					"go.octolab.org/runtime_test", "callB", "func1", // TODO:invalid
+					"go.octolab.org/runtime_test", "", "callB.func1",
 				}
 			}(),
 		},
@@ -146,7 +153,7 @@ func TestCaller(t *testing.T) {
 			altCallB,
 			expected{
 				"go.octolab.org/runtime_test.altCallB.func1",
-				"go.octolab.org/runtime_test", "altCallB", "func1", // TODO:invalid
+				"go.octolab.org/runtime_test", "", "altCallB.func1",
 			},
 		},
 	}
@@ -208,6 +215,19 @@ func (*structure) callB() CallerInfo {
 
 func (caller *structure) proxyCallB() CallerInfo {
 	return caller.callB()
+}
+
+func (structure) callC() CallerInfo {
+	var lambda1, lambda2 func() CallerInfo
+	//go:noinline prevent to inline in lambda2
+	lambda1 = func() CallerInfo {
+		return lambda2()
+	}
+	//go:noinline prevent to inline in callC
+	lambda2 = func() CallerInfo {
+		return Caller()
+	}
+	return lambda1()
 }
 
 type function func() CallerInfo
