@@ -220,13 +220,12 @@ func (caller *structure) proxyCallB() CallerInfo {
 	return caller.callB()
 }
 
+//go:noinline prevent to inline lambda2 and Caller
 func (structure) callC() CallerInfo {
 	var lambda1, lambda2 func() CallerInfo
-	//go:noinline prevent to inline in lambda2
 	lambda1 = func() CallerInfo {
 		return lambda2()
 	}
-	//go:noinline prevent to inline in callC
 	lambda2 = func() CallerInfo { //nolint:gocritic
 		return Caller()
 	}
