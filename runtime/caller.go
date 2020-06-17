@@ -47,3 +47,21 @@ func (info CallerInfo) Meta() (pkg, receiver, method string) {
 	}
 	return base + parts[0], "", parts[1]
 }
+
+// PackageName is a shorthand for Meta to return only the package name.
+func (info CallerInfo) PackageName() string {
+	pkg, _, _ := info.Meta()
+	return pkg
+}
+
+// ReceiverName is a shorthand for Meta to return only the receiver name.
+func (info CallerInfo) ReceiverName() string {
+	_, receiver, _ := info.Meta()
+	return receiver
+}
+
+// MethodName is a shorthand for Meta to return only the method name.
+func (info CallerInfo) MethodName() string {
+	_, _, method := info.Meta()
+	return method
+}

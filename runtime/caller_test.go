@@ -163,6 +163,9 @@ func TestCaller(t *testing.T) {
 			caller := test.caller()
 			pkg, receiver, method := caller.Meta()
 			assert.Equal(t, test.expected, expected{caller.Name, pkg, receiver, method})
+			assert.Equal(t, pkg, caller.PackageName())
+			assert.Equal(t, receiver, caller.ReceiverName())
+			assert.Equal(t, method, caller.MethodName())
 		})
 	}
 }
@@ -224,7 +227,7 @@ func (structure) callC() CallerInfo {
 		return lambda2()
 	}
 	//go:noinline prevent to inline in callC
-	lambda2 = func() CallerInfo {
+	lambda2 = func() CallerInfo { //nolint:gocritic
 		return Caller()
 	}
 	return lambda1()
@@ -252,7 +255,7 @@ func proxyCallA() CallerInfo {
 }
 
 func callB() CallerInfo {
-	return func() CallerInfo {
+	return func() CallerInfo { //nolint:gocritic
 		return Caller()
 	}()
 }
@@ -273,7 +276,7 @@ func altProxyCallA() CallerInfo {
 }
 
 func altCallB() CallerInfo {
-	return func() CallerInfo {
+	return func() CallerInfo { //nolint:gocritic
 		return altCaller()
 	}()
 }

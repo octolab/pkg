@@ -43,22 +43,22 @@ func (size Size) String() string {
 	switch {
 	case size >= Exabyte:
 		unit = 'E'
-		value = value / Exabyte
+		value /= Exabyte
 	case size >= Petabyte:
 		unit = 'P'
-		value = value / Petabyte
+		value /= Petabyte
 	case size >= Terabyte:
 		unit = 'T'
-		value = value / Terabyte
+		value /= Terabyte
 	case size >= Gigabyte:
 		unit = 'G'
-		value = value / Gigabyte
+		value /= Gigabyte
 	case size >= Megabyte:
 		unit = 'M'
-		value = value / Megabyte
+		value /= Megabyte
 	case size >= Kilobyte:
 		unit = 'K'
-		value = value / Kilobyte
+		value /= Kilobyte
 	default:
 		unit = 'B'
 	}
