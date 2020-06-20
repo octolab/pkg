@@ -103,7 +103,7 @@ func (*NetworkError) Is(err error) bool {
 // RecoveredError can check recovered errors.
 type RecoveredError struct{}
 
-func (*RecoveredError) Error() string      { return "recovered error" }
+func (*RecoveredError) Error() string      { return "recovered after panic" }
 func (*RecoveredError) Cause() interface{} { return nil }
 
 // Is reports whether the error matches recovered error class.
@@ -114,7 +114,7 @@ func (*RecoveredError) Is(err error) bool {
 
 type RetriableError struct{}
 
-func (*RetriableError) Error() string   { return "retriable error" }
+func (*RetriableError) Error() string   { return "retriable action error" }
 func (*RetriableError) Retriable() bool { return false }
 
 // Is reports whether the error matches retriable error class.
