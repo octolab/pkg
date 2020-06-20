@@ -16,7 +16,10 @@ import (
 func TestClassifier_Classify(t *testing.T) {
 	classifier := make(Classifier).
 		ClassifyAs(networkClass, new(NetworkError)).
-		ClassifyAs(filesystemClass, os.ErrExist, os.ErrNotExist)
+		ClassifyAs(fatalClass, new(RecoveredError)).
+		ClassifyAs(filesystemClass, os.ErrExist, os.ErrNotExist).
+		ClassifyAs(repeatableClass, new(RetriableError)).
+		ClassifyAs(Unknown, nil)
 
 	tests := map[string]struct {
 		err      error
@@ -26,13 +29,24 @@ func TestClassifier_Classify(t *testing.T) {
 		"wrapped error": {errors.Wrap(os.ErrExist, "wrapped"), filesystemClass},
 		"network error": {new(net.AddrError), networkClass},
 		"custom error":  {new(network), networkClass},
-		"nil error":     {nil, Unknown},
-		"unknown error": {os.ErrInvalid, Unknown},
+		"fatal error": {
+			func() (err error) {
+				defer func() {
+					if r := recover(); r != nil {
+						err = &recovered{r}
+					}
+				}()
+				panic("at the Disco")
+			}(), fatalClass},
+		"repeatable error": {new(retriable), repeatableClass},
+		"nil error":        {nil, Unknown},
+		"unknown error":    {os.ErrInvalid, Unknown},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert.Equal(t, test.expected, classifier.Classify(test.err, Unknown))
+			assert.Equal(t, Unknown, (Classifier)(nil).Classify(test.err, Unknown))
 		})
 	}
 }
@@ -52,8 +66,10 @@ func TestClassifier_Consistent(t *testing.T) {
 			make(Classifier).
 				ClassifyAs(networkClass, new(NetworkError)).
 				ClassifyAs(timeoutClass, new(TimeoutError), new(NetworkError)),
-			true,
+			false,
 		},
+		"nil":   {nil, true},
+		"empty": {make(Classifier), true},
 	}
 
 	for name, test := range tests {
@@ -67,12 +83,24 @@ func TestClassifier_Consistent(t *testing.T) {
 
 const (
 	networkClass    = "network"
+	fatalClass      = "fatal"
 	filesystemClass = "fs"
+	repeatableClass = "repeatable"
 	timeoutClass    = "timeout"
 )
 
 type network struct{}
 
-func (err *network) Error() string   { return "custom" }
+func (err *network) Error() string   { return "network error" }
 func (err *network) Timeout() bool   { return true }
 func (err *network) Temporary() bool { return true }
+
+type recovered struct{ panic interface{} }
+
+func (err *recovered) Error() string      { return "recovered after panic" }
+func (err *recovered) Cause() interface{} { return err.panic }
+
+type retriable struct{}
+
+func (err *retriable) Error() string   { return "retriable action error" }
+func (err *retriable) Retriable() bool { return true }

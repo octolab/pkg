@@ -63,6 +63,24 @@ func (classifier Classifier) ClassifyAs(class string, list ...error) Classifier 
 
 // Consistent checks that different groups don't contain similar errors.
 func (classifier Classifier) Consistent() bool {
+	var total int
+	for _, list := range classifier {
+		total += len(list)
+	}
+	if total == 0 {
+		return true
+	}
+	flat := make([]error, 0, total)
+	for _, list := range classifier {
+		flat = append(flat, list...)
+	}
+	for i, err := range flat {
+		for _, target := range flat[i+1:] {
+			if errors.Is(err, target) || errors.Is(target, err) {
+				return false
+			}
+		}
+	}
 	return true
 }
 
