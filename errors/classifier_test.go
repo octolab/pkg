@@ -16,8 +16,7 @@ import (
 func TestClassifier_Classify(t *testing.T) {
 	classifier := make(Classifier).
 		ClassifyAs(networkClass, new(NetworkError)).
-		ClassifyAs(filesystemClass, os.ErrExist, os.ErrNotExist).
-		ClassifyAs(timeoutClass, new(TimeoutError), new(NetworkError), nil)
+		ClassifyAs(filesystemClass, os.ErrExist, os.ErrNotExist)
 
 	tests := map[string]struct {
 		err      error

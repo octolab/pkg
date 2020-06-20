@@ -82,6 +82,29 @@ func (*NetworkError) Is(err error) bool {
 	return is
 }
 
+// RecoveredError can check recovered errors.
+type RecoveredError struct{}
+
+func (*RecoveredError) Error() string      { return "recovered error" }
+func (*RecoveredError) Cause() interface{} { return nil }
+
+// Is reports whether the error matches recovered error class.
+func (*RecoveredError) Is(err error) bool {
+	_, is := err.(Recovered)
+	return is
+}
+
+type RetriableError struct{}
+
+func (*RetriableError) Error() string   { return "retriable error" }
+func (*RetriableError) Retriable() bool { return false }
+
+// Is reports whether the error matches retriable error class.
+func (*RetriableError) Is(err error) bool {
+	_, is := err.(Retriable)
+	return is
+}
+
 // TemporaryError can check temporary errors.
 type TemporaryError struct{}
 
