@@ -47,8 +47,8 @@ func TestClassifier_Classify(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			require.True(t, classifier.Consistent())
-			assert.Equal(t, test.expected, classifier.Classify(test.err, Unknown))
-			assert.Equal(t, Unknown, (Classifier)(nil).Classify(test.err, Unknown))
+			assert.Equal(t, test.expected, classifier.Classify(test.err))
+			assert.Equal(t, Unknown, (Classifier)(nil).Classify(test.err))
 		})
 	}
 }
@@ -120,7 +120,7 @@ func TestClassifier_ClassifyAs(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			require.True(t, test.classifier.Consistent())
 			for _, err := range test.list {
-				assert.NotEqual(t, Unknown, test.classifier.Classify(err, Unknown))
+				assert.NotEqual(t, Unknown, test.classifier.Classify(err))
 			}
 		})
 	}

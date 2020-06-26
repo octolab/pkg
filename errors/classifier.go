@@ -12,6 +12,7 @@ import (
 type Classifier map[string][]error
 
 // Classify classifies the error and returns its class name.
+// If it cannot to classify it returns the Unknown.
 //
 //  func (service *Service) Do(ctx context.Context, payload interface{}) {
 //  	resp, err := service.proxy.Call(ctx, Data{Payload: payload})
@@ -22,9 +23,9 @@ type Classifier map[string][]error
 //  	...
 //  }
 //
-func (classifier Classifier) Classify(err error, fallback string) string {
+func (classifier Classifier) Classify(err error) string {
 	if err = Unwrap(err); err == nil {
-		return fallback
+		return Unknown
 	}
 	for class, list := range classifier {
 		for _, target := range list {
@@ -33,7 +34,7 @@ func (classifier Classifier) Classify(err error, fallback string) string {
 			}
 		}
 	}
-	return fallback
+	return Unknown
 }
 
 // ClassifyAs unwraps the errors and stores them with the class name.
