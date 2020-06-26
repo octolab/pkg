@@ -85,6 +85,22 @@ func (classifier Classifier) Consistent() bool {
 	return true
 }
 
+// Merge returns a copy of the current Classifier with data
+// from passed classifiers.
+func (classifier Classifier) Merge(classifiers ...Classifier) Classifier {
+	dst := make(Classifier, len(classifier))
+	for k, v := range classifier {
+		dst[k] = make([]error, len(v))
+		copy(dst[k], v)
+	}
+	for _, src := range classifiers {
+		for class, list := range src {
+			dst.ClassifyAs(class, list...)
+		}
+	}
+	return dst
+}
+
 // Unknown can be used as the fallback class name of error classification.
 const Unknown = "unknown"
 
@@ -92,8 +108,8 @@ const Unknown = "unknown"
 type NetworkError struct{}
 
 func (*NetworkError) Error() string   { return "network error" }
-func (*NetworkError) Temporary() bool { return false }
-func (*NetworkError) Timeout() bool   { return false }
+func (*NetworkError) Temporary() bool { return true }
+func (*NetworkError) Timeout() bool   { return true }
 
 // Is reports whether the error matches network error class.
 func (*NetworkError) Is(err error) bool {
@@ -116,34 +132,34 @@ func (*RecoveredError) Is(err error) bool {
 type RetriableError struct{}
 
 func (*RetriableError) Error() string   { return "retriable action error" }
-func (*RetriableError) Retriable() bool { return false }
+func (*RetriableError) Retriable() bool { return true }
 
 // Is reports whether the error matches retriable error class.
 func (*RetriableError) Is(err error) bool {
-	_, is := err.(Retriable)
-	return is
+	casted, is := err.(Retriable)
+	return is && casted.Retriable()
 }
 
 // TemporaryError can check temporary errors.
 type TemporaryError struct{}
 
 func (*TemporaryError) Error() string   { return "temporary error" }
-func (*TemporaryError) Temporary() bool { return false }
+func (*TemporaryError) Temporary() bool { return true }
 
 // Is reports whether the error matches temporary error class.
 func (*TemporaryError) Is(err error) bool {
-	_, is := err.(interface{ Temporary() bool })
-	return is
+	casted, is := err.(interface{ Temporary() bool })
+	return is && casted.Temporary()
 }
 
 // TimeoutError can check timeout errors.
 type TimeoutError struct{}
 
 func (*TimeoutError) Error() string { return "timeout error" }
-func (*TimeoutError) Timeout() bool { return false }
+func (*TimeoutError) Timeout() bool { return true }
 
 // Is reports whether the error matches timeout error class.
 func (*TimeoutError) Is(err error) bool {
-	_, is := err.(interface{ Timeout() bool })
-	return is
+	casted, is := err.(interface{ Timeout() bool })
+	return is && casted.Timeout()
 }

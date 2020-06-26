@@ -95,23 +95,41 @@ func TestClassifier_ClassifyAs(t *testing.T) {
 		temporaryClass: {
 			make(Classifier).ClassifyAs(temporaryClass, new(TemporaryError)),
 			[]error{
-				new(net.AddrError),
-				&net.DNSConfigError{Err: new(net.DNSError)},
-				new(net.DNSError),
-				new(net.InvalidAddrError),
-				&net.OpError{Err: new(net.InvalidAddrError)},
-				new(net.UnknownNetworkError),
+				func() error {
+					err := new(net.DNSError)
+					err.IsTimeout = true
+					return err
+				}(),
+				&net.DNSConfigError{Err: func() error {
+					err := new(net.DNSError)
+					err.IsTimeout = true
+					return err
+				}()},
+				&net.OpError{Err: func() error {
+					err := new(net.DNSError)
+					err.IsTimeout = true
+					return err
+				}()},
 			},
 		},
 		timeoutClass: {
 			make(Classifier).ClassifyAs(timeoutClass, new(TimeoutError)),
 			[]error{
-				new(net.AddrError),
-				&net.DNSConfigError{Err: new(net.DNSError)},
-				new(net.DNSError),
-				new(net.InvalidAddrError),
-				&net.OpError{Err: new(net.InvalidAddrError)},
-				new(net.UnknownNetworkError),
+				func() error {
+					err := new(net.DNSError)
+					err.IsTimeout = true
+					return err
+				}(),
+				&net.DNSConfigError{Err: func() error {
+					err := new(net.DNSError)
+					err.IsTimeout = true
+					return err
+				}()},
+				&net.OpError{Err: func() error {
+					err := new(net.DNSError)
+					err.IsTimeout = true
+					return err
+				}()},
 			},
 		},
 	}
@@ -154,12 +172,29 @@ func TestClassifier_Consistent(t *testing.T) {
 	}
 }
 
+func TestClassifier_Merge(t *testing.T) {
+	classifierX := make(Classifier).ClassifyAs(networkClass, new(NetworkError))
+	assert.True(t, classifierX.Consistent())
+	assert.Equal(t, networkClass, classifierX.Classify(new(network)))
+	assert.Equal(t, Unknown, classifierX.Classify(new(recovered)))
+
+	classifierY := make(Classifier).ClassifyAs(fatalClass, new(RecoveredError))
+	assert.True(t, classifierY.Consistent())
+	assert.Equal(t, fatalClass, classifierY.Classify(new(recovered)))
+	assert.Equal(t, Unknown, classifierY.Classify(new(network)))
+
+	classifierZ := classifierX.Merge(classifierY)
+	assert.True(t, classifierZ.Consistent())
+	assert.Equal(t, networkClass, classifierZ.Classify(new(network)))
+	assert.Equal(t, fatalClass, classifierZ.Classify(new(recovered)))
+}
+
 func TestClassifier_Presets(t *testing.T) {
 	t.Run(networkClass, func(t *testing.T) {
 		err := new(NetworkError)
 		assert.EqualError(t, err, "network error")
-		assert.False(t, err.Temporary())
-		assert.False(t, err.Timeout())
+		assert.True(t, err.Temporary())
+		assert.True(t, err.Timeout())
 	})
 	t.Run(fatalClass, func(t *testing.T) {
 		err := new(RecoveredError)
@@ -169,17 +204,17 @@ func TestClassifier_Presets(t *testing.T) {
 	t.Run(repeatableClass, func(t *testing.T) {
 		err := new(RetriableError)
 		assert.EqualError(t, err, "retriable action error")
-		assert.False(t, err.Retriable())
+		assert.True(t, err.Retriable())
 	})
 	t.Run(temporaryClass, func(t *testing.T) {
 		err := new(TemporaryError)
 		assert.EqualError(t, err, "temporary error")
-		assert.False(t, err.Temporary())
+		assert.True(t, err.Temporary())
 	})
 	t.Run(timeoutClass, func(t *testing.T) {
 		err := new(TimeoutError)
 		assert.EqualError(t, err, "timeout error")
-		assert.False(t, err.Timeout())
+		assert.True(t, err.Timeout())
 	})
 }
 
