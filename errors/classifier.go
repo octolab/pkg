@@ -5,6 +5,7 @@ package errors
 import (
 	"errors"
 	"net"
+	"strings"
 )
 
 // Classifier provides functionality to classify errors
@@ -103,6 +104,16 @@ func (classifier Classifier) Merge(classifiers ...Classifier) Classifier {
 
 // Unknown can be used as the fallback class name of error classification.
 const Unknown = "unknown"
+
+// MessageError can check errors by their error message.
+type MessageError struct{ Message string }
+
+func (matcher MessageError) Error() string { return matcher.Message }
+
+// Is reports whether the error matches message error class.
+func (matcher MessageError) Is(err error) bool {
+	return err != nil && strings.Contains(err.Error(), matcher.Message)
+}
 
 // NetworkError can check network errors.
 type NetworkError struct{}
