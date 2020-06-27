@@ -50,9 +50,13 @@ func (classifier Classifier) ClassifyAs(class string, list ...error) Classifier 
 			continue
 		}
 		var present bool
-		for _, target := range classifier[class] {
-			if errors.Is(target, err) {
+		for i, matcher := range classifier[class] {
+			if errors.Is(matcher, err) {
 				present = true
+				break
+			}
+			if errors.Is(err, matcher) {
+				classifier[class][i], present = err, true
 				break
 			}
 		}
