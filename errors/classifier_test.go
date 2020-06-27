@@ -3,6 +3,7 @@
 package errors_test
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"testing"
@@ -16,9 +17,9 @@ import (
 
 func TestClassifier_Classify(t *testing.T) {
 	classifier := make(Classifier).
-		ClassifyAs(networkClass, new(NetworkError)).
 		ClassifyAs(fatalClass, new(RecoveredError)).
 		ClassifyAs(filesystemClass, os.ErrExist, os.ErrNotExist).
+		ClassifyAs(networkClass, new(NetworkError)).
 		ClassifyAs(repeatableClass, new(RetriableError)).
 		ClassifyAs(Unknown, nil)
 
@@ -26,22 +27,15 @@ func TestClassifier_Classify(t *testing.T) {
 		err      error
 		expected string
 	}{
-		"naked error":      {os.ErrExist, filesystemClass},
-		"wrapped error":    {errors.Wrap(os.ErrExist, "wrapped"), filesystemClass},
-		"network error":    {new(net.AddrError), networkClass},
-		"custom error":     {new(network), networkClass},
-		"repeatable error": {new(retriable), repeatableClass},
-		"nil error":        {nil, Unknown},
-		"unknown error":    {os.ErrInvalid, Unknown},
-		"fatal error": {
-			func() (err error) {
-				defer func() {
-					if r := recover(); r != nil {
-						err = &recovered{r}
-					}
-				}()
-				panic("at the Disco")
-			}(), fatalClass},
+		"naked error":          {os.ErrExist, filesystemClass},
+		"wrapped by pkg error": {errors.Wrap(os.ErrExist, "wrapped"), filesystemClass},
+		"wrapped by fmt error": {fmt.Errorf("wrapped: %w", os.ErrExist), filesystemClass},
+		"network error":        {new(net.AddrError), networkClass},
+		"custom error":         {new(network), networkClass},
+		"repeatable error":     {new(retriable), repeatableClass},
+		"fatal error":          {fatal(), fatalClass},
+		"nil error":            {nil, Unknown},
+		"unknown error":        {os.ErrInvalid, Unknown},
 	}
 
 	for name, test := range tests {
@@ -58,20 +52,12 @@ func TestClassifier_ClassifyAs(t *testing.T) {
 		classifier Classifier
 		list       []error
 	}{
-		networkClass: {
-			make(Classifier).ClassifyAs(networkClass, new(NetworkError)),
-			[]error{
-				new(net.AddrError),
-				&net.DNSConfigError{Err: new(net.DNSError)},
-				new(net.DNSError),
-				new(net.InvalidAddrError),
-				&net.OpError{Err: new(net.InvalidAddrError)},
-				new(net.UnknownNetworkError),
-			},
-		},
 		fatalClass: {
 			make(Classifier).ClassifyAs(fatalClass, new(RecoveredError)),
-			[]error{new(recovered)},
+			[]error{
+				new(recovered),
+				fatal(),
+			},
 		},
 		filesystemClass: {
 			make(Classifier).ClassifyAs(filesystemClass,
@@ -86,50 +72,50 @@ func TestClassifier_ClassifyAs(t *testing.T) {
 				os.ErrPermission,
 			},
 		},
+		networkClass: {
+			make(Classifier).ClassifyAs(networkClass, new(NetworkError)),
+			[]error{
+				new(net.AddrError),
+				&net.DNSConfigError{Err: new(net.DNSError)},
+				new(net.DNSError),
+				new(net.InvalidAddrError),
+				&net.OpError{Err: new(net.InvalidAddrError)},
+				new(net.UnknownNetworkError),
+			},
+		},
 		repeatableClass: {
 			make(Classifier).ClassifyAs(repeatableClass, new(RetriableError)),
 			[]error{
 				new(retriable),
 			},
 		},
+		specificClass: {
+			make(Classifier).ClassifyAs(specificClass, MessageError{Message: "dial tcp"}),
+			[]error{
+				errors.New("dial tcp: i/o timeout"),
+				errors.New(
+					(&net.OpError{
+						Op:  "dial",
+						Net: "tcp",
+						Err: fmt.Errorf("i/o timeout"),
+					}).Error(),
+				),
+			},
+		},
 		temporaryClass: {
 			make(Classifier).ClassifyAs(temporaryClass, new(TemporaryError)),
 			[]error{
-				func() error {
-					err := new(net.DNSError)
-					err.IsTimeout = true
-					return err
-				}(),
-				&net.DNSConfigError{Err: func() error {
-					err := new(net.DNSError)
-					err.IsTimeout = true
-					return err
-				}()},
-				&net.OpError{Err: func() error {
-					err := new(net.DNSError)
-					err.IsTimeout = true
-					return err
-				}()},
+				temporary(),
+				&net.DNSConfigError{Err: temporary()},
+				&net.OpError{Err: temporary()},
 			},
 		},
 		timeoutClass: {
 			make(Classifier).ClassifyAs(timeoutClass, new(TimeoutError)),
 			[]error{
-				func() error {
-					err := new(net.DNSError)
-					err.IsTimeout = true
-					return err
-				}(),
-				&net.DNSConfigError{Err: func() error {
-					err := new(net.DNSError)
-					err.IsTimeout = true
-					return err
-				}()},
-				&net.OpError{Err: func() error {
-					err := new(net.DNSError)
-					err.IsTimeout = true
-					return err
-				}()},
+				timeout(),
+				&net.DNSConfigError{Err: timeout()},
+				&net.OpError{Err: timeout()},
 			},
 		},
 	}
@@ -151,14 +137,22 @@ func TestClassifier_Consistent(t *testing.T) {
 	}{
 		"consistent": {
 			make(Classifier).
-				ClassifyAs(networkClass, new(NetworkError)).
-				ClassifyAs(filesystemClass, os.ErrExist, os.ErrNotExist),
+				ClassifyAs(filesystemClass, os.ErrExist, os.ErrNotExist).
+				ClassifyAs(networkClass,
+					new(TemporaryError), new(NetworkError), new(TimeoutError)),
+			true,
+		},
+		"consistent subset case": {
+			make(Classifier).
+				ClassifyAs(networkClass,
+					new(NetworkError), new(TemporaryError), new(TimeoutError)),
 			true,
 		},
 		"not consistent": {
 			make(Classifier).
 				ClassifyAs(networkClass, new(NetworkError)).
-				ClassifyAs(timeoutClass, new(TimeoutError), new(NetworkError)),
+				ClassifyAs(temporaryClass, new(TemporaryError)).
+				ClassifyAs(timeoutClass, new(TimeoutError)),
 			false,
 		},
 		"nil":   {nil, true},
@@ -173,38 +167,42 @@ func TestClassifier_Consistent(t *testing.T) {
 }
 
 func TestClassifier_Merge(t *testing.T) {
-	classifierX := make(Classifier).ClassifyAs(networkClass, new(NetworkError))
+	classifierX := make(Classifier).ClassifyAs(fatalClass, new(RecoveredError))
 	assert.True(t, classifierX.Consistent())
-	assert.Equal(t, networkClass, classifierX.Classify(new(network)))
-	assert.Equal(t, Unknown, classifierX.Classify(new(recovered)))
+	assert.Equal(t, fatalClass, classifierX.Classify(new(recovered)))
+	assert.Equal(t, Unknown, classifierX.Classify(new(network)))
 
-	classifierY := make(Classifier).ClassifyAs(fatalClass, new(RecoveredError))
+	classifierY := make(Classifier).ClassifyAs(networkClass, new(NetworkError))
 	assert.True(t, classifierY.Consistent())
-	assert.Equal(t, fatalClass, classifierY.Classify(new(recovered)))
-	assert.Equal(t, Unknown, classifierY.Classify(new(network)))
+	assert.Equal(t, networkClass, classifierY.Classify(new(network)))
+	assert.Equal(t, Unknown, classifierY.Classify(new(recovered)))
 
-	classifierZ := classifierX.Merge(classifierY)
+	classifierZ := classifierY.Merge(classifierX)
 	assert.True(t, classifierZ.Consistent())
-	assert.Equal(t, networkClass, classifierZ.Classify(new(network)))
 	assert.Equal(t, fatalClass, classifierZ.Classify(new(recovered)))
+	assert.Equal(t, networkClass, classifierZ.Classify(new(network)))
 }
 
 func TestClassifier_Presets(t *testing.T) {
+	t.Run(fatalClass, func(t *testing.T) {
+		err := new(RecoveredError)
+		assert.EqualError(t, err, "recovered after panic")
+		assert.Nil(t, err.Cause())
+	})
 	t.Run(networkClass, func(t *testing.T) {
 		err := new(NetworkError)
 		assert.EqualError(t, err, "network error")
 		assert.True(t, err.Temporary())
 		assert.True(t, err.Timeout())
 	})
-	t.Run(fatalClass, func(t *testing.T) {
-		err := new(RecoveredError)
-		assert.EqualError(t, err, "recovered after panic")
-		assert.Nil(t, err.Cause())
-	})
 	t.Run(repeatableClass, func(t *testing.T) {
 		err := new(RetriableError)
 		assert.EqualError(t, err, "retriable action error")
 		assert.True(t, err.Retriable())
+	})
+	t.Run(specificClass, func(t *testing.T) {
+		err := MessageError{Message: "error"}
+		assert.EqualError(t, err, err.Message)
 	})
 	t.Run(temporaryClass, func(t *testing.T) {
 		err := new(TemporaryError)
@@ -218,16 +216,26 @@ func TestClassifier_Presets(t *testing.T) {
 	})
 }
 
-// helper
+// helpers
 
 const (
-	networkClass    = "network"
 	fatalClass      = "fatal"
 	filesystemClass = "fs"
+	networkClass    = "network"
 	repeatableClass = "repeatable"
+	specificClass   = "specific"
 	temporaryClass  = "temporary"
 	timeoutClass    = "timeout"
 )
+
+func fatal() (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = &recovered{r}
+		}
+	}()
+	panic("at the Disco")
+}
 
 type network struct{}
 
@@ -244,3 +252,15 @@ type retriable struct{}
 
 func (err *retriable) Error() string   { return "retriable action error" }
 func (err *retriable) Retriable() bool { return true }
+
+func temporary() error {
+	err := new(net.DNSError)
+	err.IsTemporary = true
+	return err
+}
+
+func timeout() error {
+	err := new(net.DNSError)
+	err.IsTimeout = true
+	return err
+}

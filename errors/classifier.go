@@ -51,12 +51,11 @@ func (classifier Classifier) ClassifyAs(class string, list ...error) Classifier 
 		}
 		var present bool
 		for i, matcher := range classifier[class] {
-			if errors.Is(matcher, err) {
-				present = true
-				break
+			present = errors.Is(matcher, err)
+			if !present && errors.Is(err, matcher) {
+				classifier[class][i], present = err, true // subset case
 			}
-			if errors.Is(err, matcher) {
-				classifier[class][i], present = err, true
+			if present {
 				break
 			}
 		}
