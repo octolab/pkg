@@ -2,6 +2,7 @@ package io_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -137,6 +138,7 @@ func TestTeeReadCloser(t *testing.T) {
 	payload := "invalid json"
 	req, err := http.NewRequest(http.MethodPost, "/", strings.NewReader(payload))
 	require.NoError(t, err)
+	req = req.WithContext(context.Background())
 
 	var handler http.HandlerFunc = func(rw http.ResponseWriter, req *http.Request) {
 		buf := bytes.NewBuffer(make([]byte, 0, req.ContentLength))
