@@ -2,6 +2,11 @@ package io
 
 import "io"
 
+// CascadeReadCloser returns a combination of two io.ReadCloser.
+func CascadeReadCloser(current, previous io.ReadCloser) io.ReadCloser {
+	return cascadeCloser{ReadCloser: current, previous: previous}
+}
+
 // ReadNopCloser returns a io.ReadCloser with a no-op Close method
 // wrapping the provided io.Reader.
 func ReadNopCloser(reader io.Reader) io.ReadCloser {
