@@ -2,6 +2,19 @@ package io
 
 import "io"
 
+type WriteCloserChain func(io.WriteCloser) (io.WriteCloser, error)
+
+func (wrapper WriteCloserChain) Wrap(wrapped WriteCloserChain) WriteCloserChain {
+	return func(wc io.WriteCloser) (io.WriteCloser, error) {
+		var err error
+		wc, err = wrapped(wc)
+		if err != nil {
+			return nil, err
+		}
+		return wrapper(wc)
+	}
+}
+
 // CascadeWriteCloser returns a combination of two io.WriteCloser.
 func CascadeWriteCloser(current, previous io.WriteCloser) io.WriteCloser {
 	return cascadeCloser{WriteCloser: current, previous: previous}
