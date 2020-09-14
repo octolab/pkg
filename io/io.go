@@ -6,6 +6,14 @@ import (
 	"io/ioutil"
 )
 
+// Aliases to make the package more self-sufficient.
+type (
+	Reader      = io.Reader
+	ReadCloser  = io.ReadCloser
+	Writer      = io.Writer
+	WriteCloser = io.WriteCloser
+)
+
 // RepeatableReadCloser returns a ReadCloser that can be read an unlimited number of times.
 //
 //  payload := strings.NewReader(`{"some":"payload"}`)
