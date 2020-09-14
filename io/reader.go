@@ -23,13 +23,13 @@ func ToReadCloser(reader io.Reader) io.ReadCloser {
 
 type ReadCloserChain func(io.ReadCloser) (io.ReadCloser, error)
 
-func (wrapper ReadCloserChain) Wrap(wrapped ReadCloserChain) ReadCloserChain {
+func (head ReadCloserChain) Chain(link ReadCloserChain) ReadCloserChain {
 	return func(rc io.ReadCloser) (io.ReadCloser, error) {
 		var err error
-		rc, err = wrapped(rc)
+		rc, err = link(rc)
 		if err != nil {
 			return nil, err
 		}
-		return wrapper(rc)
+		return head(rc)
 	}
 }

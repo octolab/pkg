@@ -23,13 +23,13 @@ func ToWriteCloser(writer io.Writer) io.WriteCloser {
 
 type WriteCloserChain func(io.WriteCloser) (io.WriteCloser, error)
 
-func (wrapper WriteCloserChain) Wrap(wrapped WriteCloserChain) WriteCloserChain {
+func (head WriteCloserChain) Chain(link WriteCloserChain) WriteCloserChain {
 	return func(wc io.WriteCloser) (io.WriteCloser, error) {
 		var err error
-		wc, err = wrapped(wc)
+		wc, err = link(wc)
 		if err != nil {
 			return nil, err
 		}
-		return wrapper(wc)
+		return head(wc)
 	}
 }
