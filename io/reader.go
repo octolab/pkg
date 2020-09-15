@@ -1,6 +1,23 @@
 package io
 
-// CascadeReadCloser returns a combination of two io.ReadCloser.
+// CascadeReadCloser combines two io.ReadCloser's Close methods
+// into one LIFO chain and returns first of them as a result io.ReadCloser.
+//
+//  func DecompressInput(input []byte) ([]byte, error) {
+//  	last, err := gzip.NewReader(bytes.NewReader(input))
+//  	if err != nil {
+//  		return nil, err
+//  	}
+//  	first := lzw.NewReader(last, lzw.LSB, 8)
+//  	cascade := CascadeReadCloser(first, last)
+//
+//  	buf := bytes.NewBuffer(make([]byte, 0, len(input)))
+//  	if _, err := io.Copy(buf, cascade); err != nil {
+//  		return nil, err
+//  	}
+//  	return buf.Bytes(), cascade.Close() // it calls first last.Close() and then first.Close()
+//  }
+//
 func CascadeReadCloser(current, previous ReadCloser) ReadCloser {
 	return cascadeCloser{
 		ReadCloser: current,

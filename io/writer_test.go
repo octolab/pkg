@@ -68,6 +68,7 @@ func ExampleCascadeWriteCloser() {
 	if err := cascade.Close(); err != nil {
 		panic(err)
 	}
+	// it calls first first.Close() and then last.Close()
 
 	fmt.Println(buf.Bytes())
 	// output: [31 139 8 0 0 0 0 0 0 255 202 125 54 135 147 3 16 0 0 255 255 234 40 132 127 5 0 0 0]

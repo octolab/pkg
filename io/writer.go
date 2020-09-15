@@ -14,7 +14,7 @@ package io
 //  		return nil, err
 //  	}
 //
-//  	return buf.Bytes(), cascade.Close()
+//  	return buf.Bytes(), cascade.Close() // it calls first first.Close() and then last.Close()
 //  }
 //
 func CascadeWriteCloser(current, previous WriteCloser) WriteCloser {
