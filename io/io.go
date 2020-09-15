@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 )
 
+//go:generate mockgen -destination mocks_test.go -package ${GOPACKAGE}_test io Closer,Reader,ReadCloser,Writer,WriteCloser
+
 // Aliases to make the package more self-sufficient.
 type (
 	Closer      = io.Closer

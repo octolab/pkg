@@ -2,7 +2,15 @@ package io
 
 // CascadeReadCloser returns a combination of two io.ReadCloser.
 func CascadeReadCloser(current, previous ReadCloser) ReadCloser {
-	return cascadeCloser{ReadCloser: current, previous: previous}
+	return cascadeCloser{
+		ReadCloser: current,
+		close: func() error {
+			if err := previous.Close(); err != nil {
+				return err
+			}
+			return current.Close()
+		},
+	}
 }
 
 // ReadNopCloser returns a io.ReadCloser with a no-op Close method
