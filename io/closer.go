@@ -1,19 +1,17 @@
 package io
 
-import "io"
-
 type nopCloser struct {
-	io.Reader
-	io.Writer
+	Reader
+	Writer
 }
 
 // Close implements io.Closer interface and do nothing.
 func (nopCloser) Close() error { return nil }
 
 type cascadeCloser struct {
-	io.ReadCloser
-	io.WriteCloser
-	previous io.Closer
+	ReadCloser
+	WriteCloser
+	previous Closer
 }
 
 // Close implements io.Closer interface and calls a Close method on the chain.

@@ -8,6 +8,7 @@ import (
 
 // Aliases to make the package more self-sufficient.
 type (
+	Closer      = io.Closer
 	Reader      = io.Reader
 	ReadCloser  = io.ReadCloser
 	Writer      = io.Writer
