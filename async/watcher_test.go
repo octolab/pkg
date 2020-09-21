@@ -21,7 +21,7 @@ func TestWatcher(t *testing.T) {
 		var spy uint64
 
 		r := rand.New(rand.NewSource(1))
-		watchdog := New(ctx, 50*time.Millisecond)
+		watchdog := Watcher(ctx, 50*time.Millisecond)
 		watchdog.Watch("incrementer", func() { atomic.AddUint64(&spy, 1) })
 		watchdog.Watch("duplicate", func() { atomic.AddUint64(&spy, 1) })
 		for range sequence.Simple(1 + r.Intn(5)) {
@@ -42,7 +42,7 @@ func TestWatcher(t *testing.T) {
 
 		var spy uint64
 
-		watchdog := New(ctx, 50*time.Millisecond)
+		watchdog := Watcher(ctx, 50*time.Millisecond)
 		watchdog.Watch("incrementer", func() { atomic.AddUint64(&spy, 1) })
 		watchdog.Watch("breaker", func() { panic("fail") })
 		watchdog.Start()

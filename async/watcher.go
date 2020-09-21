@@ -8,7 +8,7 @@ import (
 	"go.octolab.org/safe"
 )
 
-func New(ctx context.Context, frequency time.Duration) *watcher {
+func Watcher(ctx context.Context, frequency time.Duration) *watcher {
 	ticker := time.NewTicker(frequency)
 	return &watcher{ctx: ctx, ticker: ticker, stuff: make(map[string]func())}
 }
