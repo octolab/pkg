@@ -1,5 +1,23 @@
 package strings
 
+func Exclude(from []string, what ...string) []string {
+	// if len(from) > x && len(what) > y { map }
+	filtered := from[:0]
+	for _, row := range from {
+		found := false
+		for _, target := range what {
+			if row == target {
+				found = true
+				break
+			}
+		}
+		if !found {
+			filtered = append(filtered, row)
+		}
+	}
+	return filtered
+}
+
 // FirstNotEmpty returns a first non-empty string.
 func FirstNotEmpty(strings ...string) string {
 	for _, str := range strings {
