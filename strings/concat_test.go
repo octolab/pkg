@@ -58,7 +58,7 @@ func BenchmarkStringConcatenation(b *testing.B) {
 			pos, rr := 0, make([]rune, ln)
 			for _, str := range strings {
 				ln = utf8.RuneCountInString(str)
-				copy(rr[pos:pos+ln], []rune(str))
+				copy(rr[pos:pos+ln], []rune(str)) //nolint:gocritic
 				pos += ln
 			}
 			return string(rr)

@@ -20,7 +20,7 @@ func TestRepeat(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			var counter int
-			Repeat(func() { counter++ }, test)
+			assert.NoError(t, Repeat(HasNoError(func() { counter++ }), test))
 			assert.Equal(t, test, counter)
 		})
 	}

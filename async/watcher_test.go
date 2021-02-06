@@ -49,6 +49,6 @@ func TestWatcher(t *testing.T) {
 
 		<-ctx.Done()
 		watchdog.Stop()
-		assert.True(t, 0 <= spy && spy <= 1, spy)
+		assert.True(t, spy <= 1, spy)
 	})
 }
