@@ -10,31 +10,37 @@ import (
 
 // SetEnvs allows changing environment variables concurrently.
 //
-//  func Test(t *testing.T) {
-//  	os.Clearenv()
+//  import(
+//  	"os"
+//  	"testing"
 //
+//  	"github.com/stretchr/testify/assert"
+//  	"github.com/stretchr/testify/require"
+//
+//  	"go.octolab.org/env"
+//  	. "go.octolab.org/testing"
+//  )
+//
+//  func Test(t *testing.T) {
 //  	t.Run("case 1", func(t *testing.T) {
 //  		t.Parallel()
 //
-//  		release, err := SetEnvs(NoError, env.Must(env.GoTraceback, "system"))
+//  		release, err := SetEnvs(NoError(t), env.Must(env.GoTraceback, "system"))
 //  		require.NoError(t, err)
 //
 //  		assert.Equal(t, "system", os.Getenv(env.GoTraceback))
-//  		release(StrictNoError)
+//  		release(StrictNoError(t))
 //  	})
 //
 //  	t.Run("case 2", func(t *testing.T) {
 //  		t.Parallel()
 //
-//  		release, err := SetEnvs(NoError, env.Must(env.GoTraceback, "crash"))
+//  		release, err := SetEnvs(NoError(t), env.Must(env.GoTraceback, "crash"))
 //  		require.NoError(t, err)
 //
 //  		assert.Equal(t, "crash", os.Getenv(env.GoTraceback))
-//  		release(StrictNoError)
+//  		release(StrictNoError(t))
 //  	})
-//
-//  	_, present := os.LookupEnv(env.GoTraceback)
-//  	assert.False(t, present)
 //  }
 //
 func SetEnvs(handle func(error), vars ...env.Variable) (func(func(error)), error) {
@@ -62,10 +68,10 @@ func setEnvs(
 
 	guard.Lock()
 	for i, v := range vars {
-		if val, present := lookup(v.Key()); present {
-			before[v.Key()] = val
+		if val, present := lookup(v.Name()); present {
+			before[v.Name()] = val
 		}
-		if err = set(v.Key(), v.Value()); err != nil {
+		if err = set(v.Name(), v.Value()); err != nil {
 			err = fmt.Errorf("cannot set environment variable %s: %w", v, err)
 			break
 		}
@@ -75,10 +81,10 @@ func setEnvs(
 	rollback := func(handle func(error)) {
 		defer guard.Unlock()
 		for _, v := range vars[:pos+1] {
-			if prev, found := before[v.Key()]; found {
-				handle(set(v.Key(), prev))
+			if prev, found := before[v.Name()]; found {
+				handle(set(v.Name(), prev))
 			} else {
-				handle(unset(v.Key()))
+				handle(unset(v.Name()))
 			}
 		}
 	}

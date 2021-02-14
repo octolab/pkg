@@ -33,7 +33,8 @@ func TestWatcher(t *testing.T) {
 		for range sequence.Simple(1 + r.Intn(5)) {
 			watchdog.Stop()
 		}
-		assert.True(t, 0 < spy && spy <= 4, spy)
+		res := atomic.LoadUint64(&spy) // TODO:fix unexpected data race
+		assert.True(t, 0 < res && res <= 4, res)
 	})
 
 	t.Run("failure", func(t *testing.T) {
@@ -49,6 +50,7 @@ func TestWatcher(t *testing.T) {
 
 		<-ctx.Done()
 		watchdog.Stop()
-		assert.True(t, spy <= 1, spy)
+		res := atomic.LoadUint64(&spy) // TODO:fix unexpected data race
+		assert.True(t, res <= 1, res)
 	})
 }

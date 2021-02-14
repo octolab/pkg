@@ -11,9 +11,7 @@ import (
 	helper "go.octolab.org/testing"
 )
 
-func TestEnviron(t *testing.T) {
-	os.Clearenv()
-
+func TestEnvironment(t *testing.T) {
 	release, err := helper.SetEnvs(
 		helper.StrictNoError(t),
 		Must("KEY", "v1.0"),
@@ -21,27 +19,27 @@ func TestEnviron(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	vars := From(os.Environ())
-	assert.Equal(t, os.Environ(), vars.Environ())
+	env := From(os.Environ())
+	assert.Equal(t, os.Environ(), env.Environ())
 
 	t.Run("lookup", func(t *testing.T) {
-		val, has := vars.Lookup("KEY")
+		val, has := env.Lookup("KEY")
 		assert.True(t, has)
-		assert.Equal(t, "KEY", val.Key())
+		assert.Equal(t, "KEY", val.Name())
 		assert.Equal(t, "v1.0", val.Value())
 	})
 
 	t.Run("case-sensitive", func(t *testing.T) {
-		val, has := vars.Lookup("Key")
+		val, has := env.Lookup("Key")
 		assert.True(t, has)
-		assert.Equal(t, "Key", val.Key())
+		assert.Equal(t, "Key", val.Name())
 		assert.Equal(t, "v2.0", val.Value())
 	})
 
 	t.Run("no exists", func(t *testing.T) {
-		val, has := vars.Lookup("KeY")
+		val, has := env.Lookup("KeY")
 		assert.False(t, has)
-		assert.Empty(t, val.Key())
+		assert.Empty(t, val.Name())
 		assert.Empty(t, val.Value())
 	})
 
@@ -68,5 +66,4 @@ func TestEnviron(t *testing.T) {
 	})
 
 	release(helper.StrictNoError(t))
-	os.Clearenv()
 }

@@ -9,6 +9,8 @@ import (
 
 // NoError returns a helper as an error handler
 // to check no error occurred.
+//
+// See SetEnvs' example.
 func NoError(t *testing.T) func(error) {
 	return func(err error) {
 		t.Helper()
@@ -18,6 +20,8 @@ func NoError(t *testing.T) func(error) {
 
 // StrictNoError returns a helper as a strict
 // error handler to check no error occurred.
+//
+// See SetEnvs' example.
 func StrictNoError(t *testing.T) func(error) {
 	return func(err error) {
 		t.Helper()

@@ -2,7 +2,6 @@ package testing
 
 import (
 	"errors"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,13 +10,12 @@ import (
 )
 
 func Test_setEnvs(t *testing.T) {
-	os.Clearenv()
-
 	release, err := setEnvs(
 		func(string) (string, bool) { return "", false },
 		func(string, string) error { return errors.New("unhealthy") },
 		func(string) error { return nil },
 		func(error) {},
+		env.Must(env.Go111Module, "on"),
 		env.Must(env.GoArch, "amd64"),
 		env.Must(env.GoDebug, "allocfreetrace=1,clobberfree=1"),
 		env.Must(env.GoGC, "off"),
@@ -30,6 +28,4 @@ func Test_setEnvs(t *testing.T) {
 	)
 	assert.Error(t, err)
 	assert.Nil(t, release)
-
-	os.Clearenv()
 }
