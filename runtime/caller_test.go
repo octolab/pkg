@@ -3,7 +3,6 @@ package runtime_test
 import (
 	"runtime"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -11,24 +10,6 @@ import (
 )
 
 func TestCaller(t *testing.T) {
-	ahead := func(t *testing.T, current GoVersion, target struct {
-		version GoVersion
-		release string
-	}) bool {
-		if current.Equal(target.version) {
-			return true
-		}
-		if !unstable(current.Raw) {
-			return current.Later(target.version)
-		}
-		prefix := "devel +61170f85e6 "
-		layout := "Mon Jan 2 15:04:05 2006 -0700"
-		release, _ := time.Parse(layout, target.release)
-		control, _ := time.Parse(layout, current.Raw[len(prefix):])
-		t.Log(target.release, "->", release, "<->", control, "<-", current.Raw[len(prefix):])
-		return control.After(release)
-	}
-
 	type expected struct {
 		name                  string
 		pkg, receiver, method string
@@ -75,35 +56,17 @@ func TestCaller(t *testing.T) {
 		},
 		"call by function type": {
 			function(Caller).call,
-			func() expected {
-				if ahead(t, Version(), go112) {
-					// https://golang.org/doc/go1.12#runtime
-					return expected{
-						"go.octolab.org/runtime_test.function.call-fm",
-						"go.octolab.org/runtime_test", "function", "call-fm",
-					}
-				}
-				return expected{
-					"go.octolab.org/runtime_test.function.call",
-					"go.octolab.org/runtime_test", "function", "call",
-				}
-			}(),
+			expected{
+				"go.octolab.org/runtime_test.function.call",
+				"go.octolab.org/runtime_test", "function", "call",
+			},
 		},
 		"call by primitive type": {
 			new(integer).call,
-			func() expected {
-				if ahead(t, Version(), go112) {
-					// https://golang.org/doc/go1.12#runtime
-					return expected{
-						"go.octolab.org/runtime_test.integer.call-fm",
-						"go.octolab.org/runtime_test", "integer", "call-fm",
-					}
-				}
-				return expected{
-					"go.octolab.org/runtime_test.integer.call",
-					"go.octolab.org/runtime_test", "integer", "call",
-				}
-			}(),
+			expected{
+				"go.octolab.org/runtime_test.integer.call",
+				"go.octolab.org/runtime_test", "integer", "call",
+			},
 		},
 		"direct function call": {
 			callA,
@@ -135,19 +98,10 @@ func TestCaller(t *testing.T) {
 		},
 		"lambda call": {
 			callB,
-			func() expected {
-				if ahead(t, Version(), go112) {
-					// https://golang.org/doc/go1.12#runtime
-					return expected{
-						"go.octolab.org/runtime_test.callB",
-						"go.octolab.org/runtime_test", "", "callB",
-					}
-				}
-				return expected{
-					"go.octolab.org/runtime_test.callB.func1",
-					"go.octolab.org/runtime_test", "", "callB.func1",
-				}
-			}(),
+			expected{
+				"go.octolab.org/runtime_test.callB.func1",
+				"go.octolab.org/runtime_test", "", "callB.func1",
+			},
 		},
 		"lambda call (alt)": {
 			altCallB,
@@ -226,7 +180,8 @@ func (structure) callC() CallerInfo {
 	lambda1 = func() CallerInfo {
 		return lambda2()
 	}
-	lambda2 = func() CallerInfo { //nolint:gocritic
+	//nolint:gocritic
+	lambda2 = func() CallerInfo {
 		return Caller()
 	}
 	return lambda1()
@@ -254,7 +209,8 @@ func proxyCallA() CallerInfo {
 }
 
 func callB() CallerInfo {
-	return func() CallerInfo { //nolint:gocritic
+	//nolint:gocritic
+	return func() CallerInfo {
 		return Caller()
 	}()
 }
@@ -265,7 +221,7 @@ func altCaller() CallerInfo {
 	return CallerInfo{Name: f.Name(), File: file, Line: line}
 }
 
-//go:noinline
+//go:noinline prevent to inline altProxyCallA
 func altCallA() CallerInfo {
 	return altCaller()
 }
@@ -275,7 +231,8 @@ func altProxyCallA() CallerInfo {
 }
 
 func altCallB() CallerInfo {
-	return func() CallerInfo { //nolint:gocritic
+	//nolint:gocritic
+	return func() CallerInfo {
 		return altCaller()
 	}()
 }

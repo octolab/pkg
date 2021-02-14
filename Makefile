@@ -2,7 +2,7 @@
 
 .DEFAULT_GOAL = test-with-coverage
 GIT_HOOKS     = post-merge pre-commit pre-push
-GO_VERSIONS   = 1.11 1.12 1.13 1.14 1.15
+GO_VERSIONS   = 1.13 1.14 1.15
 GO111MODULE   = on
 
 AT    := @
@@ -79,9 +79,9 @@ ifeq (, $(wildcard $(GOTEST)))
 	GOTEST = $(shell command -v testit)
 endif
 ifeq (, $(GOTEST))
-	GOTEST = go test
+	GOTEST = go test -gcflags all=-N
 else
-	GOTEST := $(GOTEST) go --colored --stacked
+	GOTEST := $(GOTEST) go --colored --stacked -gcflags all=-N
 endif
 
 ifeq (, $(PACKAGES))

@@ -1,4 +1,4 @@
-package context_test
+package testing_test
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	. "go.octolab.org/context"
+	. "go.octolab.org/testing"
 	"go.octolab.org/time"
 )
 

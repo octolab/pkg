@@ -48,14 +48,8 @@ func TestVersion_Compare(t *testing.T) {
 	})
 }
 
+// helpers
+
 func unstable(version string) bool {
 	return strings.HasPrefix(version, "devel")
-}
-
-var go112 = struct {
-	version GoVersion
-	release string
-}{
-	version: GoVersion{Major: 1, Minor: 12, Raw: "go1.12"},
-	release: "Mon Feb 25 16:47:57 2019 -0500",
 }
