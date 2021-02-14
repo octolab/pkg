@@ -79,9 +79,9 @@ ifeq (, $(wildcard $(GOTEST)))
 	GOTEST = $(shell command -v testit)
 endif
 ifeq (, $(GOTEST))
-	GOTEST = go test -gcflags all=-N
+	GOTEST = go test
 else
-	GOTEST := $(GOTEST) go --colored --stacked -gcflags all=-N
+	GOTEST := $(GOTEST) go --colored --stacked
 endif
 
 ifeq (, $(PACKAGES))

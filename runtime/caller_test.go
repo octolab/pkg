@@ -97,7 +97,7 @@ func TestCaller(t *testing.T) {
 			},
 		},
 		"lambda call": {
-			callB,
+			callB(),
 			expected{
 				"go.octolab.org/runtime_test.callB.func1",
 				"go.octolab.org/runtime_test", "", "callB.func1",
@@ -139,7 +139,7 @@ func BenchmarkCaller(b *testing.B) {
 		{"direct function call (alt)", altCallA},
 		{"proxy function call", proxyCallA},
 		{"proxy function call (alt)", altProxyCallA},
-		{"lambda call", callB},
+		{"lambda call", callB()},
 		{"lambda call (alt)", altCallB},
 	}
 	for _, bm := range benchmarks {
@@ -156,7 +156,7 @@ func BenchmarkCaller(b *testing.B) {
 
 type structure struct{}
 
-//go:noinline prevent to inline in proxyCallA
+//go:noinline
 func (structure) callA() CallerInfo {
 	return Caller()
 }
@@ -165,7 +165,7 @@ func (caller structure) proxyCallA() CallerInfo {
 	return caller.callA()
 }
 
-//go:noinline prevent to inline in proxyCallB
+//go:noinline
 func (*structure) callB() CallerInfo {
 	return Caller()
 }
@@ -174,7 +174,6 @@ func (caller *structure) proxyCallB() CallerInfo {
 	return caller.callB()
 }
 
-//go:noinline prevent to inline lambda2 and Caller
 func (structure) callC() CallerInfo {
 	var lambda1, lambda2 func() CallerInfo
 	lambda1 = func() CallerInfo {
@@ -189,17 +188,19 @@ func (structure) callC() CallerInfo {
 
 type function func() CallerInfo
 
+//go:noinline
 func (fn function) call() CallerInfo {
 	return fn()
 }
 
 type integer int
 
+//go:noinline
 func (integer) call() CallerInfo {
 	return Caller()
 }
 
-//go:noinline prevent to inline in proxyCallA
+//go:noinline
 func callA() CallerInfo {
 	return Caller()
 }
@@ -208,11 +209,11 @@ func proxyCallA() CallerInfo {
 	return callA()
 }
 
-func callB() CallerInfo {
+func callB() func() CallerInfo {
 	//nolint:gocritic
 	return func() CallerInfo {
 		return Caller()
-	}()
+	}
 }
 
 func altCaller() CallerInfo {
@@ -221,7 +222,6 @@ func altCaller() CallerInfo {
 	return CallerInfo{Name: f.Name(), File: file, Line: line}
 }
 
-//go:noinline prevent to inline altProxyCallA
 func altCallA() CallerInfo {
 	return altCaller()
 }
