@@ -80,7 +80,6 @@ func (vv Vars) Environ() []string {
 
 // Lookup ...
 func (vv Vars) Lookup(key string) (Variable, bool) {
-	key = strings.ToUpper(key)
 	for _, v := range vv {
 		if v.key == key {
 			return v, true

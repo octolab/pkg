@@ -12,26 +12,25 @@ import (
 //
 //  func Test(t *testing.T) {
 //  	os.Clearenv()
-//  	var noError = func(err error) { require.NoError(t, err) }
 //
 //  	t.Run("case 1", func(t *testing.T) {
 //  		t.Parallel()
 //
-//  		release, err := SetEnvs(noError, env.Must(env.GoTraceback, "system"))
+//  		release, err := SetEnvs(NoError, env.Must(env.GoTraceback, "system"))
 //  		require.NoError(t, err)
 //
 //  		assert.Equal(t, "system", os.Getenv(env.GoTraceback))
-//  		release(noError)
+//  		release(StrictNoError)
 //  	})
 //
 //  	t.Run("case 2", func(t *testing.T) {
 //  		t.Parallel()
 //
-//  		release, err := SetEnvs(noError, env.Must(env.GoTraceback, "crash"))
+//  		release, err := SetEnvs(NoError, env.Must(env.GoTraceback, "crash"))
 //  		require.NoError(t, err)
 //
 //  		assert.Equal(t, "crash", os.Getenv(env.GoTraceback))
-//  		release(noError)
+//  		release(StrictNoError)
 //  	})
 //
 //  	_, present := os.LookupEnv(env.GoTraceback)

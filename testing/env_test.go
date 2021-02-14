@@ -33,9 +33,9 @@ func TestSetEnvs(t *testing.T) {
 	}
 
 	var (
-		faker   = gofakeit.New(time.Now().UnixNano())
-		noError = func(err error) { assert.NoError(t, err) }
-		verify  = func() {
+		faker  = gofakeit.New(time.Now().UnixNano())
+		verify = func() {
+			t.Helper()
 			for _, v := range vars {
 				val, present := os.LookupEnv(v.Key())
 				assert.Equal(t, v.present, present)
@@ -45,7 +45,7 @@ func TestSetEnvs(t *testing.T) {
 	)
 
 	t.Run("no variables", func(t *testing.T) {
-		release, err := SetEnvs(noError)
+		release, err := SetEnvs(StrictNoError(t))
 		require.NoError(t, err)
 		assert.NotPanics(t, func() { release(nil) })
 	})
@@ -57,7 +57,7 @@ func TestSetEnvs(t *testing.T) {
 		for _, v := range vars {
 			vv = append(vv, env.Must(v.Key(), v.replace))
 		}
-		release, err := SetEnvs(noError, vv...)
+		release, err := SetEnvs(StrictNoError(t), vv...)
 		require.NoError(t, err)
 		for _, v := range vars {
 			val, present := os.LookupEnv(v.Key())
@@ -65,7 +65,7 @@ func TestSetEnvs(t *testing.T) {
 			assert.Equal(t, v.replace, val)
 		}
 
-		release(noError)
+		release(StrictNoError(t))
 		verify()
 	})
 
@@ -78,7 +78,7 @@ func TestSetEnvs(t *testing.T) {
 				for _, v := range vars {
 					vv = append(vv, env.Must(v.Key(), faker.AppVersion()))
 				}
-				release, err := SetEnvs(noError, vv...)
+				release, err := SetEnvs(NoError(t), vv...)
 				require.NoError(t, err)
 				for i, v := range vars {
 					val, present := os.LookupEnv(v.Key())
@@ -86,7 +86,7 @@ func TestSetEnvs(t *testing.T) {
 					assert.Equal(t, vv[i].Value(), val)
 				}
 
-				release(noError)
+				release(NoError(t))
 			})
 		}
 	})
