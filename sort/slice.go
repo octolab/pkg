@@ -4,9 +4,9 @@ import "sort"
 
 // genome:
 // +int, +int8, +int16, +int32, +int64
-// uint, uint8, uint16, uint32, uint64
 // +float32, +float64
-// +string
+// rune, +string
+// +uint, +uint8, +uint16, +uint32, +uint64
 
 type Int8Slice []int8
 
@@ -84,6 +84,96 @@ func Float32s(a []float32) { sort.Sort(Float32Slice(a)) }
 // Float32sAreSorted tests whether a slice of float32s is sorted in increasing order
 // (not-a-number values are treated as less than other values).
 func Float32sAreSorted(a []float32) bool { return sort.IsSorted(Float32Slice(a)) }
+
+type RuneSlice []rune
+
+func (p RuneSlice) Len() int           { return len(p) }
+func (p RuneSlice) Less(i, j int) bool { return p[i] < p[j] }
+func (p RuneSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+// Sort is a convenience method.
+func (p RuneSlice) Sort() { sort.Sort(p) }
+
+// Runes sorts a slice of runes in increasing order.
+func Runes(a []rune) { sort.Sort(RuneSlice(a)) }
+
+// RunesAreSorted tests whether a slice of runes is sorted in increasing order.
+func RunesAreSorted(a []rune) bool { return sort.IsSorted(RuneSlice(a)) }
+
+type UintSlice []uint
+
+func (p UintSlice) Len() int           { return len(p) }
+func (p UintSlice) Less(i, j int) bool { return p[i] < p[j] }
+func (p UintSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+// Sort is a convenience method.
+func (p UintSlice) Sort() { sort.Sort(p) }
+
+// Uints sorts a slice of uints in increasing order.
+func Uints(a []uint) { sort.Sort(UintSlice(a)) }
+
+// UintsAreSorted tests whether a slice of uints is sorted in increasing order.
+func UintsAreSorted(a []uint) bool { return sort.IsSorted(UintSlice(a)) }
+
+type Uint8Slice []uint8
+
+func (p Uint8Slice) Len() int           { return len(p) }
+func (p Uint8Slice) Less(i, j int) bool { return p[i] < p[j] }
+func (p Uint8Slice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+// Sort is a convenience method.
+func (p Uint8Slice) Sort() { sort.Sort(p) }
+
+// Uint8s sorts a slice of uint8s in increasing order.
+func Uint8s(a []uint8) { sort.Sort(Uint8Slice(a)) }
+
+// Uint8sAreSorted tests whether a slice of uint8s is sorted in increasing order.
+func Uint8sAreSorted(a []uint8) bool { return sort.IsSorted(Uint8Slice(a)) }
+
+type Uint16Slice []uint16
+
+func (p Uint16Slice) Len() int           { return len(p) }
+func (p Uint16Slice) Less(i, j int) bool { return p[i] < p[j] }
+func (p Uint16Slice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+// Sort is a convenience method.
+func (p Uint16Slice) Sort() { sort.Sort(p) }
+
+// Uint16s sorts a slice of uint16s in increasing order.
+func Uint16s(a []uint16) { sort.Sort(Uint16Slice(a)) }
+
+// Uint16sAreSorted tests whether a slice of uint16s is sorted in increasing order.
+func Uint16sAreSorted(a []uint16) bool { return sort.IsSorted(Uint16Slice(a)) }
+
+type Uint32Slice []uint32
+
+func (p Uint32Slice) Len() int           { return len(p) }
+func (p Uint32Slice) Less(i, j int) bool { return p[i] < p[j] }
+func (p Uint32Slice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+// Sort is a convenience method.
+func (p Uint32Slice) Sort() { sort.Sort(p) }
+
+// Uint32s sorts a slice of uint32s in increasing order.
+func Uint32s(a []uint32) { sort.Sort(Uint32Slice(a)) }
+
+// Uint32sAreSorted tests whether a slice of uint32s is sorted in increasing order.
+func Uint32sAreSorted(a []uint32) bool { return sort.IsSorted(Uint32Slice(a)) }
+
+type Uint64Slice []uint64
+
+func (p Uint64Slice) Len() int           { return len(p) }
+func (p Uint64Slice) Less(i, j int) bool { return p[i] < p[j] }
+func (p Uint64Slice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+// Sort is a convenience method.
+func (p Uint64Slice) Sort() { sort.Sort(p) }
+
+// Uint64s sorts a slice of uint64s in increasing order.
+func Uint64s(a []uint64) { sort.Sort(Uint64Slice(a)) }
+
+// Uint64sAreSorted tests whether a slice of uint64s is sorted in increasing order.
+func Uint64sAreSorted(a []uint64) bool { return sort.IsSorted(Uint64Slice(a)) }
 
 // TODO:verify
 
