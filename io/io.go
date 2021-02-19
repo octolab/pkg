@@ -2,6 +2,7 @@ package io
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"io/ioutil"
 )
@@ -16,6 +17,13 @@ type (
 	Writer      = io.Writer
 	WriteCloser = io.WriteCloser
 )
+
+func Discard(body ReadCloser) Closer {
+	if _, err := io.Copy(ioutil.Discard, body); err != nil {
+		return closer(func() error { return err })
+	}
+	return body
+}
 
 // RepeatableReadCloser returns a ReadCloser that can be read an unlimited number of times.
 //
@@ -36,7 +44,7 @@ type (
 //  	time.Sleep(time.Second)
 //  }
 //
-func RepeatableReadCloser(body io.ReadCloser, buf *bytes.Buffer) io.ReadCloser {
+func RepeatableReadCloser(body ReadCloser, buf *bytes.Buffer) ReadCloser {
 	return &repeatable{src: TeeReadCloser(body, buf), dst: buf}
 }
 
@@ -58,16 +66,16 @@ func RepeatableReadCloser(body io.ReadCloser, buf *bytes.Buffer) io.ReadCloser {
 //  	}
 //  }
 //
-func TeeReadCloser(rc io.ReadCloser, w io.Writer) io.ReadCloser {
+func TeeReadCloser(rc ReadCloser, w Writer) ReadCloser {
 	type pipe struct {
-		io.Reader
-		io.Closer
+		Reader
+		Closer
 	}
 	return pipe{io.TeeReader(rc, w), rc}
 }
 
 type repeatable struct {
-	src io.ReadCloser
+	src ReadCloser
 	dst *bytes.Buffer
 }
 
@@ -77,7 +85,7 @@ type repeatable struct {
 func (r *repeatable) Read(p []byte) (n int, err error) {
 	n, err = r.src.Read(p)
 	var eof bool
-	eof = n == 0 && err == io.EOF
+	eof = n == 0 && errors.Is(err, io.EOF)
 	eof = eof || (n < len(p) && err == nil) // danger zone ("repeatable request")
 	if eof {
 		buf := bytes.NewBuffer(make([]byte, 0, r.dst.Len()))

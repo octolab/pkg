@@ -2,7 +2,7 @@
 
 .DEFAULT_GOAL = test-with-coverage
 GIT_HOOKS     = post-merge pre-commit pre-push
-GO_VERSIONS   = 1.13 1.14 1.15
+GO_VERSIONS   = 1.13 1.14 1.15 1.16
 GO111MODULE   = on
 
 AT    := @

@@ -1,5 +1,9 @@
 package io
 
+type closer func() error
+
+func (close closer) Close() error { return close() }
+
 type nopCloser struct {
 	Reader
 	Writer
