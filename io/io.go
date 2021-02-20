@@ -18,11 +18,36 @@ type (
 	WriteCloser = io.WriteCloser
 )
 
-func Discard(body ReadCloser) Closer {
-	if _, err := io.Copy(ioutil.Discard, body); err != nil {
-		return closer(func() error { return err })
-	}
-	return body
+// Discarded returns the Closer which discards the Reader content before closes it.
+//
+//  import (
+//  	"encoding/json"
+//  	"net/http"
+//
+//  	"go.octolab.org/io"
+//  	"go.octolab.org/safe"
+//  )
+//
+//  func main() {
+//  	resp, err := http.Get(url)
+//  	if err != nil {
+//  		handle(err)
+//  	}
+//  	defer safe.Close(io.Discarded(resp.Body), handle)
+//
+//  	var data map[string]interface{}
+//  	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+//  		handle(err)
+//  	}
+//  }
+//
+func Discarded(body ReadCloser) Closer {
+	return closer(func() error {
+		if _, err := io.Copy(ioutil.Discard, body); err != nil {
+			return err
+		}
+		return body.Close()
+	})
 }
 
 // RepeatableReadCloser returns a ReadCloser that can be read an unlimited number of times.
