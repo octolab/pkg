@@ -1,20 +1,18 @@
 # sourced by https://github.com/octomation/makefiles
 
-.DEFAULT_GOAL = test-with-coverage
+.DEFAULT_GOAL = check
 GIT_HOOKS     = post-merge pre-commit pre-push
-GO_VERSIONS   = 1.13 1.14 1.15 1.16
+GO_VERSIONS   = 1.13 1.14 1.15 1.16 1.17
 GO111MODULE   = on
 
 AT    := @
 ARCH  := $(shell uname -m | tr '[:upper:]' '[:lower:]')
 OS    := $(shell uname -s | tr '[:upper:]' '[:lower:]')
-DATE  := $(shell date +%Y-%m-%dT%T%Z)
+DATE  := $(shell date -u +%Y-%m-%dT%T%Z)
 SHELL := /usr/bin/env bash -euo pipefail -c
 
 make-verbose:
-	$(eval AT :=)
-	$(eval MAKE := $(MAKE) verbose)
-	@echo > /dev/null
+	$(eval AT :=) $(eval MAKE := $(MAKE) verbose) @true
 .PHONY: make-verbose
 
 todo:
@@ -23,37 +21,45 @@ todo:
 		--exclude-dir={bin,components,node_modules,vendor} \
 		--color \
 		--text \
-		-nRo -E ' TODO:.*|SkipNow' . || true
+		-inRo -E ' TODO:.*|SkipNow' . || true
 .PHONY: todo
-
-rmdir:
-	$(AT) for dir in `git ls-files --others --exclude-standard --directory`; do \
-		find $${dir%%/} -depth -type d -empty | xargs rmdir; \
-	done
-.PHONY: rmdir
 
 COMMIT  := $(shell git rev-parse --verify HEAD)
 RELEASE := $(shell git describe --tags 2>/dev/null | rev | cut -d - -f3- | rev)
 
+ifneq (, $(wildcard bin/lib/git/hooks/))
 ifdef GIT_HOOKS
 
 hooks: unhook
-	$(AT) for hook in $(GIT_HOOKS); do cp githooks/$$hook .git/hooks/; done
+	$(AT) for hook in $(GIT_HOOKS); do \
+		cp bin/lib/git/hooks/$$hook .git/hooks/; \
+	done
 .PHONY: hooks
 
 unhook:
-	$(AT) ls .git/hooks | grep -v .sample | sed 's|.*|.git/hooks/&|' | xargs rm -f || true
+	$(AT) ls .git/hooks \
+	| grep -v .sample \
+	| sed 's|.*|.git/hooks/&|' \
+	| xargs rm -f || true
 .PHONY: unhook
 
 define hook_tpl
 $(1):
-	$$(AT) githooks/$(1)
+	$$(AT) bin/lib/git/hooks/$(1)
 .PHONY: $(1)
 endef
 
 render_hook_tpl = $(eval $(call hook_tpl,$(hook)))
 $(foreach hook,$(GIT_HOOKS),$(render_hook_tpl))
 
+endif
+else
+hooks:
+	@echo have no git hooks
+.PHONY: hooks
+
+unhook: ;
+.PHONY: unhook
 endif
 
 git-check:
@@ -62,11 +68,17 @@ git-check:
 	$(AT) ! git ls-files --others --exclude-standard | grep -q ^
 .PHONY: git-check
 
+git-rmdir:
+	$(AT) for dir in `git ls-files --others --exclude-standard --directory`; do \
+		find $${dir%%/} -depth -type d -empty | xargs rmdir; \
+	done
+.PHONY: git-rmdir
+
 GOBIN       ?= $(PWD)/bin/$(OS)/$(ARCH)
 GOFLAGS     ?= -mod=
 GOPRIVATE   ?= go.octolab.net
 GOPROXY     ?= direct
-GOTEST      ?= $(GOBIN)/testit
+GOTEST      ?= $(shell PATH=$(PATH) command -v testit)
 GOTESTFLAGS ?=
 GOTRACEBACK ?= all
 LOCAL       ?= $(MODULE)
@@ -75,9 +87,6 @@ PACKAGES    ?= `go list $(GOFLAGS) ./...`
 PATHS       ?= $(shell echo $(PACKAGES) | sed -e "s|$(MODULE)/||g" | sed -e "s|$(MODULE)|$(PWD)/*.go|g")
 TIMEOUT     ?= 1s
 
-ifeq (, $(wildcard $(GOTEST)))
-	GOTEST = $(shell command -v testit)
-endif
 ifeq (, $(GOTEST))
 	GOTEST = go test
 else
@@ -116,12 +125,12 @@ go-env:
 
 go-verbose:
 	$(eval GOTESTFLAGS := -v)
-	@echo > /dev/null
+	@echo >/dev/null
 .PHONY: go-verbose
 
 deps-check:
 	$(AT) go mod verify
-	$(AT) if command -v egg > /dev/null; then \
+	$(AT) if command -v egg >/dev/null; then \
 		egg deps check license; \
 		egg deps check version; \
 	fi
@@ -143,7 +152,7 @@ deps-tidy:
 
 deps-update: selector = '{{if not (or .Main .Indirect)}}{{.Path}}{{end}}'
 deps-update:
-	$(AT) if command -v egg > /dev/null; then \
+	$(AT) if command -v egg >/dev/null; then \
 		packages="`egg deps list | tr ' ' '\n' | sed -e 's|$$|/...@latest|'`"; \
 	else \
 		packages="`go list -f $(selector) -m -mod=readonly all | sed -e 's|$$|/...@latest|'`"; \
@@ -161,7 +170,7 @@ go-docs:
 .PHONY: go-docs
 
 go-fmt:
-	$(AT) if command -v goimports > /dev/null; then \
+	$(AT) if command -v goimports >/dev/null; then \
 		goimports -local $(LOCAL) -ungroup -w $(PATHS); \
 	else \
 		gofmt -s -w $(PATHS); \
@@ -177,8 +186,11 @@ go-pkg:
 .PHONY: go-pkg
 
 lint:
-	$(AT) golangci-lint run ./...
-	$(AT) looppointer ./...
+	$(AT) if command -v golangci-lint >/dev/null; then \
+		golangci-lint run ./...; \
+	else \
+		echo have no golangci-lint binary; \
+	fi
 .PHONY: lint
 
 test:
@@ -236,6 +248,7 @@ tools-env:
 	@echo "TOOLFLAGS:   $(TOOLFLAGS)"
 .PHONY: tools-env
 
+ifneq (, $(wildcard ./tools/))
 tools-fetch: GOFLAGS = $(TOOLFLAGS)
 tools-fetch:
 	$(AT) cd tools; \
@@ -261,7 +274,7 @@ tools-update: GOFLAGS = $(TOOLFLAGS)
 tools-update: selector = '{{if not (or .Main .Indirect)}}{{.Path}}{{end}}'
 tools-update:
 	$(AT) cd tools; \
-	if command -v egg > /dev/null; then \
+	if command -v egg >/dev/null; then \
 		packages="`egg deps list | tr ' ' '\n' | sed -e 's|$$|/...@latest|'`"; \
 	else \
 		packages="`go list -f $(selector) -m -mod=readonly all | sed -e 's|$$|/...@latest|'`"; \
@@ -270,7 +283,29 @@ tools-update:
 	for package in $$packages; do go get -d $$package; done
 	$(AT) $(MAKE) tools-tidy tools-install
 .PHONY: tools-update
+else
+tools-disabled:
+	@echo have no tools
+.PHONY: tools-disabled
 
+tools-fetch: tools-disabled
+	@echo >/dev/null
+.PHONY: tools-fetch
+
+tools-tidy: tools-disabled
+	@echo >/dev/null
+.PHONY: tools-tidy
+
+tools-install: tools-disabled
+	@echo >/dev/null
+.PHONY: tools-install
+
+tools-update: tools-disabled
+	@echo >/dev/null
+.PHONY: tools-update
+endif
+
+ifneq (, $(shell PATH=$(PATH) command -v docker))
 ifdef GO_VERSIONS
 
 define go_tpl
@@ -287,13 +322,16 @@ render_go_tpl = $(eval $(call go_tpl,$(version)))
 $(foreach version,$(GO_VERSIONS),$(render_go_tpl))
 
 endif
-
+endif
 
 export PATH := $(GOBIN):$(PATH)
 
-init: deps test lint hooks
+init: deps check hooks
 	$(AT) git config core.autocrlf input
 .PHONY: init
+
+check: test lint
+.PHONY: check
 
 clean: deps-clean test-clean
 .PHONY: clean
@@ -315,8 +353,11 @@ format: go-fmt
 generate: go-generate format
 .PHONY: generate
 
-refresh: deps-tidy update deps generate test
+refresh: deps-tidy update deps generate check
 .PHONY: refresh
+
+tools: tools-install
+.PHONY: tools
 
 update: deps-update tools-update
 .PHONY: update
@@ -324,5 +365,5 @@ update: deps-update tools-update
 verbose: make-verbose go-verbose
 .PHONY: verbose
 
-verify: deps-check generate test lint git-check
+verify: deps-check generate check git-check
 .PHONY: verify

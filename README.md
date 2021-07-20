@@ -27,8 +27,8 @@ $ go get go.octolab.org@latest
 <p align="right">made with ❤️ for everyone</p>
 
 [awesome.icon]:     https://awesome.re/mentioned-badge.svg
-[build.page]:       https://travis-ci.com/octolab/pkg
-[build.icon]:       https://travis-ci.com/octolab/pkg.svg?branch=master
+[build.page]:       https://github.com/octolab/pkg/actions/workflows/ci.yml
+[build.icon]:       https://github.com/octolab/pkg/actions/workflows/ci.yml/badge.svg
 [coverage.page]:    https://codeclimate.com/github/octolab/pkg/test_coverage
 [coverage.icon]:    https://api.codeclimate.com/v1/badges/c570179a9335c747e77c/test_coverage
 [design.page]:      https://www.notion.so/33715348cc114ea79dd350a25d16e0b0?r=0b753cbf767346f5a6fd51194829a2f3
@@ -41,5 +41,3 @@ $ go get go.octolab.org@latest
 [quality.icon]:     https://goreportcard.com/badge/go.octolab.org
 [template.page]:    https://github.com/octomation/go-module
 [template.icon]:    https://img.shields.io/badge/template-go--module-blue
-
-[_]:                https://img.shields.io/sourcegraph/rrc/go.octolab.org
