@@ -209,6 +209,7 @@ func proxyCallA() CallerInfo {
 	return callA()
 }
 
+//go:noinline
 func callB() func() CallerInfo {
 	//nolint:gocritic
 	return func() CallerInfo {
