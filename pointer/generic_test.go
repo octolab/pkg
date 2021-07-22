@@ -16,7 +16,7 @@ func TestGeneric(t *testing.T) {
 	if ToOrNil(x) != nil {
 		t.Errorf("ToOrNil(%v)", x)
 	}
-	if Get((*time.Time)(nil)) != x {
+	if ValueOf((*time.Time)(nil)) != x {
 		t.Errorf("Time(%v)", nil)
 	}
 
@@ -27,7 +27,7 @@ func TestGeneric(t *testing.T) {
 	if *ToOrNil(x) != x {
 		t.Errorf("*ToOrNil(%v)", x)
 	}
-	if Get(&x) != x {
-		t.Errorf("Get(%v)", &x)
+	if ValueOf(&x) != x {
+		t.Errorf("ValueOf(%v)", &x)
 	}
 }
