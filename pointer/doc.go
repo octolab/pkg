@@ -1,6 +1,7 @@
-// Package pointer provides helpers to get pointers to values of built-in primitives.
+// Package pointer provides helpers to convert between pointers
+// and values of built-in (and, with generics, of any) types.
 //
 // Based on https://github.com/AlekSi/pointer.
-// Synced at https://github.com/AlekSi/pointer/compare/4f2b1f4deff73a28288291183baa1e9dff4a93a5...master.
+// Synced at https://github.com/AlekSi/pointer/compare/039be97b958cc3cbeb2329617d2e493bd2331fac...main.
 // Original license: https://github.com/AlekSi/pointer/blob/master/LICENSE.
 package pointer
