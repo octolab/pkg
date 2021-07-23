@@ -55,7 +55,8 @@ jobs:
       - run: make tools
       - run: '[ $(grep go:gen tools/tools.go | wc -l) = $(ls bin/linux/*/* | wc -l) ]'
 
-      - run: make pre-push
+      # TODO:disabled go1.18 and generics
+      # - run: make pre-push
 
   notify:
     runs-on: ubuntu-18.04
