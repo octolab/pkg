@@ -13,3 +13,6 @@ Taskfile        export-ignore
 
 *_test.go       export-ignore
 testdata/       export-ignore
+
+go.sum          linguist-generated
+*.go            text eol=lf

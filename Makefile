@@ -2,7 +2,7 @@
 
 .DEFAULT_GOAL = check
 GIT_HOOKS     = post-merge pre-commit pre-push
-GO_VERSIONS   = 1.13 1.14 1.15 1.16 1.17
+GO_VERSIONS   = 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19
 GO111MODULE   = on
 
 AT    := @
@@ -78,11 +78,11 @@ GOBIN       ?= $(PWD)/bin/$(OS)/$(ARCH)
 GOFLAGS     ?= -mod=
 GOPRIVATE   ?= go.octolab.net
 GOPROXY     ?= direct
-GOTEST      ?= $(shell PATH=$(PATH) command -v testit)
+GOTEST      ?= $(shell PATH="$(PATH)" command -v testit)
 GOTESTFLAGS ?=
 GOTRACEBACK ?= all
 LOCAL       ?= $(MODULE)
-MODULE      ?= `go list -m $(GOFLAGS)`
+MODULE      ?= `go list $(GOFLAGS)`
 PACKAGES    ?= `go list $(GOFLAGS) ./...`
 PATHS       ?= $(shell echo $(PACKAGES) | sed -e "s|$(MODULE)/||g" | sed -e "s|$(MODULE)|$(PWD)/*.go|g")
 TIMEOUT     ?= 1s
@@ -124,8 +124,7 @@ go-env:
 .PHONY: go-env
 
 go-verbose:
-	$(eval GOTESTFLAGS := -v)
-	@echo >/dev/null
+	$(eval GOTESTFLAGS := -v) @true
 .PHONY: go-verbose
 
 deps-check:
@@ -153,12 +152,15 @@ deps-tidy:
 deps-update: selector = '{{if not (or .Main .Indirect)}}{{.Path}}{{end}}'
 deps-update:
 	$(AT) if command -v egg >/dev/null; then \
-		packages="`egg deps list | tr ' ' '\n' | sed -e 's|$$|/...@latest|'`"; \
+		packages="`egg deps list | tr ' ' '\n'`"; \
 	else \
-		packages="`go list -f $(selector) -m -mod=readonly all | sed -e 's|$$|/...@latest|'`"; \
+		packages="`go list -f $(selector) -m -mod=readonly all`"; \
 	fi; \
-	if [[ "$$packages" = "/...@latest" ]]; then exit; fi; \
-	for package in $$packages; do go get -d $$package; done
+	if [ -z "$$packages" ]; then exit; fi; \
+	for package in $$packages; do \
+		go mod edit -require=$$package@latest; \
+		go mod tidy; \
+	done
 	$(AT) $(MAKE) deps-tidy
 .PHONY: deps-update
 
@@ -170,11 +172,7 @@ go-docs:
 .PHONY: go-docs
 
 go-fmt:
-	$(AT) if command -v goimports >/dev/null; then \
-		goimports -local $(LOCAL) -ungroup -w $(PATHS); \
-	else \
-		gofmt -s -w $(PATHS); \
-	fi
+	$(AT) goimports -local $(LOCAL) -w $(PATHS)
 .PHONY: go-fmt
 
 go-generate:
@@ -186,11 +184,7 @@ go-pkg:
 .PHONY: go-pkg
 
 lint:
-	$(AT) if command -v golangci-lint >/dev/null; then \
-		golangci-lint run ./...; \
-	else \
-		echo have no golangci-lint binary; \
-	fi
+	$(AT) golangci-lint run --enable looppointer ./...
 .PHONY: lint
 
 test:
@@ -275,12 +269,15 @@ tools-update: selector = '{{if not (or .Main .Indirect)}}{{.Path}}{{end}}'
 tools-update:
 	$(AT) cd tools; \
 	if command -v egg >/dev/null; then \
-		packages="`egg deps list | tr ' ' '\n' | sed -e 's|$$|/...@latest|'`"; \
+		packages="`egg deps list | tr ' ' '\n'`"; \
 	else \
-		packages="`go list -f $(selector) -m -mod=readonly all | sed -e 's|$$|/...@latest|'`"; \
+		packages="`go list -f $(selector) -m -mod=readonly all`"; \
 	fi; \
-	if [[ "$$packages" = "/...@latest" ]]; then exit; fi; \
-	for package in $$packages; do go get -d $$package; done
+	if [ -z "$$packages" ]; then exit; fi; \
+	for package in $$packages; do \
+		go mod edit -require=$$package@latest; \
+		go mod tidy; \
+	done
 	$(AT) $(MAKE) tools-tidy tools-install
 .PHONY: tools-update
 else
@@ -289,23 +286,23 @@ tools-disabled:
 .PHONY: tools-disabled
 
 tools-fetch: tools-disabled
-	@echo >/dev/null
+	@true
 .PHONY: tools-fetch
 
 tools-tidy: tools-disabled
-	@echo >/dev/null
+	@true
 .PHONY: tools-tidy
 
 tools-install: tools-disabled
-	@echo >/dev/null
+	@true
 .PHONY: tools-install
 
 tools-update: tools-disabled
-	@echo >/dev/null
+	@true
 .PHONY: tools-update
 endif
 
-ifneq (, $(shell PATH=$(PATH) command -v docker))
+ifneq (, $(shell PATH="$(PATH)" command -v docker))
 ifdef GO_VERSIONS
 
 define go_tpl

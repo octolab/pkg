@@ -1,30 +1,26 @@
 linters:
   fast: true
-  fetch: >
-    curl -s https://golangci-lint.run/usage/linters/ \
-    | pup ':parent-of(#enabled-by-default-linters)' \
-    | pup 'table td a json{}' \
-    | jq -r '.[] | (.text + " " + .href)' \
-    | column -t
   enable:
-    - deadcode      # https://github.com/remyoudompheng/go-misc/tree/master/deadcode
-    - errcheck      # https://github.com/kisielk/errcheck
-    - gosimple      # https://github.com/dominikh/go-tools/tree/master/simple
-    - govet         # https://golang.org/cmd/vet/
-    - ineffassign   # https://github.com/gordonklaus/ineffassign
-    - staticcheck   # https://staticcheck.io/
-    - structcheck   # https://github.com/opennota/check
-    - typecheck     # -
-    - unused        # https://github.com/dominikh/go-tools/tree/master/unused
-    - varcheck      # https://github.com/opennota/check
+    #d    - deadcode            # https://github.com/remyoudompheng/go-misc/tree/master/deadcode
+    - errcheck            # https://github.com/kisielk/errcheck
+    - gosimple            # https://github.com/dominikh/go-tools/tree/master/simple
+    - govet               # https://golang.org/cmd/vet/
+    - ineffassign         # https://github.com/gordonklaus/ineffassign
+    - staticcheck         # https://staticcheck.io/
+    #d    - structcheck         # https://github.com/opennota/check
+    - typecheck           # -
+    - unused              # https://github.com/dominikh/go-tools/tree/master/unused
+    #d    - varcheck            # https://github.com/opennota/check
 
-    - bodyclose     # https://github.com/timakin/bodyclose
-    - exhaustive    # https://github.com/nishanths/exhaustive
-    - exportloopref # https://github.com/kyoh86/exportloopref
-    - gocritic      # https://github.com/go-critic/go-critic
-    - looppointer   # https://github.com/kyoh86/looppointer
-    - noctx         # https://github.com/sonatard/noctx
+    #!    - bodyclose           # https://github.com/timakin/bodyclose
+    - exhaustive          # https://github.com/nishanths/exhaustive
+    - exportloopref       # https://github.com/kyoh86/exportloopref
+    - gocritic            # https://github.com/go-critic/go-critic
+    - noctx               # https://github.com/sonatard/noctx
 
+#    - looppointer        # https://github.com/kyoh86/looppointer
+
+#    - asasalint          # https://github.com/alingse/asasalint
 #    - asciicheck         # https://github.com/tdakkota/asciicheck
 #    - bidichk            # https://github.com/breml/bidichk
 #    - containedctx       # https://github.com/sivchari/containedctx
@@ -38,7 +34,9 @@ linters:
 #    - errchkjson         # https://github.com/breml/errchkjson
 #    - errname            # https://github.com/Antonboom/errname
 #    - errorlint          # https://github.com/polyfloyd/go-errorlint
+#    - execinquery        # https://github.com/lufeee/execinquery
 #    - exhaustivestruct   # https://github.com/mbilski/exhaustivestruct
+#    - exhaustruct        # https://github.com/GaijinEntertainment/go-exhaustruct
 #    - forbidigo          # https://github.com/ashanbrown/forbidigo
 #    - forcetypeassert    # https://github.com/gostaticanalysis/forcetypeassert
 #    - funlen             # https://github.com/ultraware/funlen
@@ -77,6 +75,9 @@ linters:
 #    - nilnil             # https://github.com/Antonboom/nilnil
 #    - nlreturn           # https://github.com/ssgreg/nlreturn
 #    - nolintlint         # https://github.com/golangci/golangci-lint/blob/master/pkg/golinters/nolintlint/README.md
+#    - nonamedreturns     # https://github.com/firefart/nonamedreturns
+#    - nosnakecase        # https://github.com/sivchari/nosnakecase
+#    - nosprintfhostport  # https://github.com/stbenjam/no-sprintf-host-port
 #    - paralleltest       # https://github.com/kunwardeep/paralleltest
 #    - prealloc           # https://github.com/alexkohler/prealloc
 #    - predeclared        # https://github.com/nishanths/predeclared
