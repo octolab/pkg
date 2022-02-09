@@ -37,8 +37,9 @@ func TestJob(t *testing.T) {
 // go test -run=NONE -bench=BenchmarkBackground ./safe
 // 1293283               917 ns/op              80 B/op          3 allocs/op
 // 1260637               957 ns/op              96 B/op          4 allocs/op
-//  125277              8455 ns/op             504 B/op         10 allocs/op
-//  677760              1520 ns/op              32 B/op          2 allocs/op
+//
+//	125277              8455 ns/op             504 B/op         10 allocs/op
+//	677760              1520 ns/op              32 B/op          2 allocs/op
 func BenchmarkBackground(b *testing.B) {
 	b.Run("without error", func(b *testing.B) {
 		b.ReportAllocs()

@@ -9,11 +9,10 @@ import (
 // UUID provides functionality to produce a new random
 // Universal Unique Identifier as defined in RFC 4122.
 //
-//  uuid, ids := new(generator.UUID), make([]entity.ID, 4)
-//  for i := range sequence.Simple(len(ids)) {
-//  	ids[i] = entity.ID(uid.Next())
-//  }
-//
+//	uuid, ids := new(generator.UUID), make([]entity.ID, 4)
+//	for i := range sequence.Simple(len(ids)) {
+//		ids[i] = entity.ID(uid.Next())
+//	}
 type UUID [16]byte
 
 // Next returns a new random UUID which may or may not be valid.

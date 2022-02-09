@@ -4,10 +4,9 @@ import "time"
 
 // Stopwatch calculates the fn execution time.
 //
-//  var result interface{}
+//	var result interface{}
 //
-//  duration := fn.Stopwatch(func() { result = do.some("heavy") })
-//
+//	duration := fn.Stopwatch(func() { result = do.some("heavy") })
 func Stopwatch(fn func()) time.Duration {
 	start := time.Now()
 	fn()

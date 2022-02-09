@@ -2,11 +2,10 @@ package sequence
 
 // Range returns a specific slice for range iteration on another slice.
 //
-//  batch, entities := 100, entity.Fetch() // []entity.Model
-//  for step, end := range sequence.Range(len(entities), batch) {
-//  	service.Process(entities[batch*step:end])
-//  }
-//
+//	batch, entities := 100, entity.Fetch() // []entity.Model
+//	for step, end := range sequence.Range(len(entities), batch) {
+//		service.Process(entities[batch*step:end])
+//	}
 func Range(size, batch int) []int {
 	count := size / batch
 	if size%batch != 0 {

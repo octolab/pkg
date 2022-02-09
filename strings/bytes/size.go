@@ -27,13 +27,15 @@ type Size uint64
 
 // String returns a human-readable byte string of the form 10M,
 // 12.5K, and so forth. The following units are available:
-//  E: Exabyte
-//  P: Petabyte
-//  T: Terabyte
-//  G: Gigabyte
-//  M: Megabyte
-//  K: Kilobyte
-//  B: Byte
+//
+//	E: Exabyte
+//	P: Petabyte
+//	T: Terabyte
+//	G: Gigabyte
+//	M: Megabyte
+//	K: Kilobyte
+//	B: Byte
+//
 // The unit that results in the smallest number greater than
 // or equal to 1 is always chosen.
 func (size Size) String() string {
@@ -71,12 +73,13 @@ func (size Size) String() string {
 
 // ParseSize parses a string formatted by Size as bytes.
 // Note binary-prefixed and SI prefixed units both mean a base-2 units
-//  KB = K = KiB = 1024
-//  MB = M = MiB = 1024 * K
-//  GB = G = GiB = 1024 * M
-//  TB = T = TiB = 1024 * G
-//  PB = P = PiB = 1024 * T
-//  EB = E = EiB = 1024 * P
+//
+//	KB = K = KiB = 1024
+//	MB = M = MiB = 1024 * K
+//	GB = G = GiB = 1024 * M
+//	TB = T = TiB = 1024 * G
+//	PB = P = PiB = 1024 * T
+//	EB = E = EiB = 1024 * P
 func ParseSize(s string) (Size, error) {
 	s = strings.ToUpper(strings.TrimSpace(s))
 

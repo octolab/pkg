@@ -4,13 +4,12 @@ import "sort"
 
 // ReduceInts wraps sequence of integers to perform aggregate operations above it.
 //
-//  ticket, err := semaphore.Acquire(ctx, sequence.ReduceInts(places...).Sum())
+//	ticket, err := semaphore.Acquire(ctx, sequence.ReduceInts(places...).Sum())
 //
-//  if err != nil {
-//  	...
-//  }
-//  defer semaphore.Release(ticket)
-//
+//	if err != nil {
+//		...
+//	}
+//	defer semaphore.Release(ticket)
 func ReduceInts(sequence ...int) Reducer {
 	return intReducer(sequence)
 }

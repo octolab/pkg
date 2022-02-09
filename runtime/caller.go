@@ -11,12 +11,11 @@ var lambda = regexp.MustCompile(`func\d+$`)
 
 // Caller returns information about the current caller.
 //
-//  func StoreToDatabase(data Payload) error {
-//  	defer stats.NewTiming().Send(runtime.Caller().Name)
+//	func StoreToDatabase(data Payload) error {
+//		defer stats.NewTiming().Send(runtime.Caller().Name)
 //
-//  	...
-//  }
-//
+//		...
+//	}
 func Caller() CallerInfo {
 	pc := make([]uintptr, 1)
 	runtime.Callers(2, pc)

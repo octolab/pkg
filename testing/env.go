@@ -10,39 +10,38 @@ import (
 
 // SetEnvs allows changing environment variables concurrently.
 //
-//  import(
-//  	"os"
-//  	"testing"
+//	import(
+//		"os"
+//		"testing"
 //
-//  	"github.com/stretchr/testify/assert"
-//  	"github.com/stretchr/testify/require"
+//		"github.com/stretchr/testify/assert"
+//		"github.com/stretchr/testify/require"
 //
-//  	"go.octolab.org/env"
-//  	. "go.octolab.org/testing"
-//  )
+//		"go.octolab.org/env"
+//		. "go.octolab.org/testing"
+//	)
 //
-//  func Test(t *testing.T) {
-//  	t.Run("case 1", func(t *testing.T) {
-//  		t.Parallel()
+//	func Test(t *testing.T) {
+//		t.Run("case 1", func(t *testing.T) {
+//			t.Parallel()
 //
-//  		release, err := SetEnvs(NoError(t), env.Must(env.GoTraceback, "system"))
-//  		require.NoError(t, err)
+//			release, err := SetEnvs(NoError(t), env.Must(env.GoTraceback, "system"))
+//			require.NoError(t, err)
 //
-//  		assert.Equal(t, "system", os.Getenv(env.GoTraceback))
-//  		release(StrictNoError(t))
-//  	})
+//			assert.Equal(t, "system", os.Getenv(env.GoTraceback))
+//			release(StrictNoError(t))
+//		})
 //
-//  	t.Run("case 2", func(t *testing.T) {
-//  		t.Parallel()
+//		t.Run("case 2", func(t *testing.T) {
+//			t.Parallel()
 //
-//  		release, err := SetEnvs(NoError(t), env.Must(env.GoTraceback, "crash"))
-//  		require.NoError(t, err)
+//			release, err := SetEnvs(NoError(t), env.Must(env.GoTraceback, "crash"))
+//			require.NoError(t, err)
 //
-//  		assert.Equal(t, "crash", os.Getenv(env.GoTraceback))
-//  		release(StrictNoError(t))
-//  	})
-//  }
-//
+//			assert.Equal(t, "crash", os.Getenv(env.GoTraceback))
+//			release(StrictNoError(t))
+//		})
+//	}
 func SetEnvs(handle func(error), vars ...env.Variable) (func(func(error)), error) {
 	return setEnvs(os.LookupEnv, os.Setenv, os.Unsetenv, handle, vars...)
 }

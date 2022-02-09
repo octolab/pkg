@@ -8,11 +8,11 @@ import (
 
 // A Job provides a top level API above the sync.WaitGroup.
 //
-//  job := new(async.Job)
-//  for _, action := range jobs {
-//  	job.Do(action, logger)
-//  }
-//  job.Wait()
+//	job := new(async.Job)
+//	for _, action := range jobs {
+//		job.Do(action, logger)
+//	}
+//	job.Wait()
 //
 // It looks a little bit similar to the golang.org/x/sync/errgroup.
 type Job sync.WaitGroup

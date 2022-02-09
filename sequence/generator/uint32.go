@@ -4,12 +4,11 @@ import "sync/atomic"
 
 // Uint32 provides functionality to produce increasing sequence of numbers.
 //
-//  uid, ids := new(generator.Uint32).At(7), make([]entity.ID, 4)
+//	uid, ids := new(generator.Uint32).At(7), make([]entity.ID, 4)
 //
-//  for i := range sequence.Simple(len(ids)) {
-//  	ids[i] = entity.ID(uid.Next())
-//  }
-//
+//	for i := range sequence.Simple(len(ids)) {
+//		ids[i] = entity.ID(uid.Next())
+//	}
 type Uint32 uint32
 
 // At sets the Uint32 to the new position.

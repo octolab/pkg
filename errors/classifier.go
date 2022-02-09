@@ -16,15 +16,14 @@ type Classifier map[string][]error
 // Classify classifies the error and returns its class name.
 // If it cannot to classify it returns the Unknown.
 //
-//  func (service *Service) Do(ctx context.Context, payload interface{}) {
-//  	resp, err := service.proxy.Call(ctx, Data{Payload: payload})
-//  	if err != nil {
-//  		service.telemetry.Increment(global.Classifier.Classify(err, errors.Unknown))
-//  		...
-//  	}
-//  	...
-//  }
-//
+//	func (service *Service) Do(ctx context.Context, payload interface{}) {
+//		resp, err := service.proxy.Call(ctx, Data{Payload: payload})
+//		if err != nil {
+//			service.telemetry.Increment(global.Classifier.Classify(err, errors.Unknown))
+//			...
+//		}
+//		...
+//	}
 func (classifier Classifier) Classify(err error) string {
 	if err = Unwrap(err); err == nil {
 		return Unknown
@@ -41,10 +40,9 @@ func (classifier Classifier) Classify(err error) string {
 
 // ClassifyAs unwraps the errors and stores them with the class name.
 //
-//  classifier := make(errors.Classifier).
-//  	ClassifyAs("network", new(errors.NetworkError)).
-//  	ClassifyAs("fs", os.ErrExist, os.ErrNotExist)
-//
+//	classifier := make(errors.Classifier).
+//		ClassifyAs("network", new(errors.NetworkError)).
+//		ClassifyAs("fs", os.ErrExist, os.ErrNotExist)
 func (classifier Classifier) ClassifyAs(class string, list ...error) Classifier {
 	for _, err := range list {
 		if err = Unwrap(err); err == nil {

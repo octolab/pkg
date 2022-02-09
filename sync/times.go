@@ -7,16 +7,15 @@ import (
 
 // Times add possibility to Do some action the N times.
 //
-//  barrier := sync.Times(100)
+//	barrier := sync.Times(100)
 //
-//  func Call(action func() error) {
-//  	barrier.Do(func () {
-//  		if err := action(); err != nil {
-//  			logger.WithError(err).Error("send the error to the Sentry only 100 times")
-//  		}
-//  	})
-//  }
-//
+//	func Call(action func() error) {
+//		barrier.Do(func () {
+//			if err := action(); err != nil {
+//				logger.WithError(err).Error("send the error to the Sentry only 100 times")
+//			}
+//		})
+//	}
 func Times(n uint32) interface{ Do(func()) } {
 	return &times{limit: n}
 }

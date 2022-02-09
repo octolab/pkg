@@ -4,12 +4,11 @@ import "sync/atomic"
 
 // Uint64 provides functionality to produce increasing sequence of numbers.
 //
-//  uid, ids := new(generator.Uint64).At(7), make([]entity.ID, 4)
+//	uid, ids := new(generator.Uint64).At(7), make([]entity.ID, 4)
 //
-//  for i := range sequence.Simple(len(ids)) {
-//  	ids[i] = entity.ID(uid.Next())
-//  }
-//
+//	for i := range sequence.Simple(len(ids)) {
+//		ids[i] = entity.ID(uid.Next())
+//	}
 type Uint64 uint64
 
 // At sets the Uint64 to the new position.

@@ -20,27 +20,26 @@ type (
 
 // Discarded returns the Closer which discards the Reader content before closes it.
 //
-//  import (
-//  	"encoding/json"
-//  	"net/http"
+//	import (
+//		"encoding/json"
+//		"net/http"
 //
-//  	"go.octolab.org/io"
-//  	"go.octolab.org/safe"
-//  )
+//		"go.octolab.org/io"
+//		"go.octolab.org/safe"
+//	)
 //
-//  func main() {
-//  	resp, err := http.Get(url)
-//  	if err != nil {
-//  		handle(err)
-//  	}
-//  	defer safe.Close(io.Discarded(resp.Body), handle)
+//	func main() {
+//		resp, err := http.Get(url)
+//		if err != nil {
+//			handle(err)
+//		}
+//		defer safe.Close(io.Discarded(resp.Body), handle)
 //
-//  	var data map[string]interface{}
-//  	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-//  		handle(err)
-//  	}
-//  }
-//
+//		var data map[string]interface{}
+//		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+//			handle(err)
+//		}
+//	}
 func Discarded(body ReadCloser) Closer {
 	return closer(func() error {
 		if _, err := io.Copy(ioutil.Discard, body); err != nil {
@@ -52,23 +51,22 @@ func Discarded(body ReadCloser) Closer {
 
 // RepeatableReadCloser returns a ReadCloser that can be read an unlimited number of times.
 //
-//  payload := strings.NewReader(`{"some":"payload"}`)
-//  body := RepeatableReadCloser(
-//  	ioutil.NopCloser(payload),
-//  	bytes.NewBuffer(make([]byte, 0, payload.Len())),
-//  )
-//  req, err := http.NewRequest(http.MethodPost, "/api", body)
-//  if err != nil {
-//  	log.Fatal(err)
-//  }
-//  for {
-//  	resp, err := http.DefaultClient.Do(req)
-//  	if err == nil && resp.StatusCode == http.StatusOK {
-//  		break
-//  	}
-//  	time.Sleep(time.Second)
-//  }
-//
+//	payload := strings.NewReader(`{"some":"payload"}`)
+//	body := RepeatableReadCloser(
+//		ioutil.NopCloser(payload),
+//		bytes.NewBuffer(make([]byte, 0, payload.Len())),
+//	)
+//	req, err := http.NewRequest(http.MethodPost, "/api", body)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	for {
+//		resp, err := http.DefaultClient.Do(req)
+//		if err == nil && resp.StatusCode == http.StatusOK {
+//			break
+//		}
+//		time.Sleep(time.Second)
+//	}
 func RepeatableReadCloser(body ReadCloser, buf *bytes.Buffer) ReadCloser {
 	return &repeatable{src: TeeReadCloser(body, buf), dst: buf}
 }
@@ -79,18 +77,17 @@ func RepeatableReadCloser(body ReadCloser, buf *bytes.Buffer) ReadCloser {
 // the write must complete before the read completes.
 // Any error encountered while writing is reported as a read error.
 //
-//  func Handler(rw http.ResponseWriter, req *http.Request) {
-//  	buf := bytes.NewBuffer(make([]byte, 0, req.ContentLength))
-//  	body := io.TeeReadCloser(req.Body, buf)
-//  	defer safe.Close(body, unsafe.Ignore)
+//	func Handler(rw http.ResponseWriter, req *http.Request) {
+//		buf := bytes.NewBuffer(make([]byte, 0, req.ContentLength))
+//		body := io.TeeReadCloser(req.Body, buf)
+//		defer safe.Close(body, unsafe.Ignore)
 //
-//  	var payload interface{}
-//  	if err := json.NewDecoder(body).Decode(&payload); err != nil {
-//  		message := fmt.Sprintf("invalid json: %s", buf.String())
-//  		http.Error(rw, message, http.StatusBadRequest)
-//  	}
-//  }
-//
+//		var payload interface{}
+//		if err := json.NewDecoder(body).Decode(&payload); err != nil {
+//			message := fmt.Sprintf("invalid json: %s", buf.String())
+//			http.Error(rw, message, http.StatusBadRequest)
+//		}
+//	}
 func TeeReadCloser(rc ReadCloser, w Writer) ReadCloser {
 	type pipe struct {
 		Reader
