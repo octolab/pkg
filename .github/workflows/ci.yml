@@ -39,13 +39,18 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('tools/go.sum') }}
           restore-keys: ${{ runner.os }}-go-
 
-      - run: make clean tools generate lint git-check
+      # TODO:revert https://github.com/kamilsk/golangci-lint/issues/83
+      - run: git apply dirty.patch
+      - run: make tools generate lint # git-check
+      - run: git reset --hard && git clean -df && make git-check
+      # TODO:revert
 
   test:
     strategy:
       matrix:
         go:
           - 1.x
+# TODO:extend support it
 #          - 1.11.x
 #          - 1.12.x
           - 1.13.x

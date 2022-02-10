@@ -5,8 +5,6 @@ GIT_HOOKS     = post-merge pre-commit pre-push
 GO_VERSIONS   = 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19
 GO111MODULE   = on
 
-GOPRIVATE = github.com/kamilsk/golangci-lint
-
 AT    := @
 ARCH  := $(shell uname -m | tr '[:upper:]' '[:lower:]')
 OS    := $(shell uname -s | tr '[:upper:]' '[:lower:]')
