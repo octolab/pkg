@@ -38,6 +38,7 @@ jobs:
       - run: make tools
       - run: git reset --hard && git clean -df
       # TODO:revert
+
       - run: '[ $(ls bin/linux/*/* | wc -l) = $(grep go:gen tools/tools.go | wc -l) ]'
 
       - run: make pre-push
