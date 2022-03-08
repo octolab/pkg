@@ -1,11 +1,14 @@
 name: tooling
 
 on:
+  workflow_dispatch:
+
   pull_request:
     branches: [ '*' ]
     paths:
       - '.github/workflows/tools.yml'
       - 'tools/*'
+
   push:
     branches: [ '*' ]
     paths:
@@ -33,15 +36,9 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('tools/go.sum') }}
           restore-keys: ${{ runner.os }}-go-
 
-      # TODO:revert https://github.com/kamilsk/golangci-lint/issues/83
-      - run: git apply dirty.patch
       - run: make tools
-      - run: git reset --hard && git clean -df
-      # TODO:revert
-
       - run: '[ $(ls bin/linux/*/* | wc -l) = $(grep go:gen tools/tools.go | wc -l) ]'
-
-      - run: make pre-push
+      - run: make git-check
 
   notify:
     needs: [ build ]
