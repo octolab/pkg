@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with: { fetch-depth: 0 }
       - uses: actions/setup-go@v4
         with: { go-version: '1.19', cache: true }
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with: { fetch-depth: 0 }
       - uses: actions/setup-go@v4
         with:
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with: { fetch-depth: 0 }
       - uses: actions/download-artifact@v3
         with: { name: code-coverage-report }
