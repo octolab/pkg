@@ -94,7 +94,7 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: actions/download-artifact@v3
         with: { name: code-coverage-report }
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v5
         with: { files: c.out }
 
   notify:
